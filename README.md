@@ -13,16 +13,16 @@ There appears to be an interesting intersection for a chatbot that made addition
 
 This project is aiming to create a chatbot that can have a knowledge base updated by individual users through a process of discussion, e.g.  
 
-Human: There is a game engine Unreal Engine
-Bot: OK
-Human: What is Unreal Engine?
+Human: There is a game engine Unreal Engine  
+Bot: OK  
+Human: What is Unreal Engine?  
 Bot: Unreal Engine is a game engine
 
 Ideally all conversations will be stored in the cloud.  In the first instance Github Gists seem like a good idea.  An authenticated Github user could have gists created associated with their own user account.  Although ideally the chatbot won't be tied to a particular persistence framework.
 
 This kind of system could have great applicaton for online classes.  It would be great if the faqbots knowledge base could contain all the data related to an online class including individual assignment statuses, thus allowing interactions like this:
 
-Human: What's my next assignment
+Human: What's my next assignment?  
 Bot: It's assignment 4 on prototyping a mobile interface [link]
 
 Having authenticated against something like a Google or Facebook login.
@@ -33,13 +33,13 @@ We're trying to understand how hubot persists data between conversations (https:
 
 In the first instance we've decided to go with client side javascript since it can run in HTML pages, and give the most open possible access to the faqbot.  Ideally we'd like to see simple HTML pages with the chatbot interface where authenticated users can have conversations like this:
 
-Human: There is a game engine Unreal Engine
-Bot: OK
-Human: What is Unreal Engine?
-Bot: Unreal Engine is a game
-Human: No, Unreal Engine is a game engine
-Bot: OK
-Human: What is Unreal Engine?
+Human: There is a game engine Unreal Engine  
+Bot: OK  
+Human: What is Unreal Engine?  
+Bot: Unreal Engine is a game  
+Human: No, Unreal Engine is a game engine  
+Bot: OK  
+Human: What is Unreal Engine?  
 Bot: Unreal Engine is a game engine
 
 where effectively the human is providing a specification of how the bot should be responding to a question.  This specification should then be added automatically to the set of unit tests for the bot, so that it can be checked in future against subsequent changes in specification.
