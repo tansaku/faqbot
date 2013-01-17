@@ -17,7 +17,7 @@ $(document).ready(function () {
         // 5. could add eliza/twss code?
         
         // Using named capture and flag x (free-spacing and line comments)
-        var assert = XRegExp('(?<assert>  There(\\si|\')s\\sa ) \\s?  # assert  \n' +
+        var assert = XRegExp('(?<assert>  (T|t)here(\\si|\')s\\sa ) \\s?  # assert  \n' +
                              '(?<object> [^\\s]* ) \\s?  # object \n' +
                              '(?<called> called ) \\s?  # called \n' +
                              '(?<name>   .* )     # name     ', 'x');
