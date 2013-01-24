@@ -1,4 +1,29 @@
 $(document).ready(function () {
+    // get the object we'll use for persistent storage
+    var storage = getStorage();
+
+    // We'll use the FOAF vocabularly to represent people
+    // http://en.wikipedia.org/wiki/FOAF_%28software%29
+
+    // TEMP
+    // couple of tests to see if storage and RDF is working
+    // add some people to the databank
+    storage.getDatabank()
+        .add('_:sam a foaf:Person .')
+        .add('_:sam foaf:name "Sam Joseph" .')
+        .add('_:dave a foaf:Person .')
+        .add('_:dave foaf:name "Dave Snowdon" .');
+
+    // run a query to find people and their names
+    var options = { }
+    options.databank = storage.getDatabank();
+    $.rdf(options)
+        .where('?person a foaf:Person')
+        .where('?person foaf:name ?name')
+        .each(function() {
+            updateHistory('Found person: ' + this.name.value+"<br/>");
+         });
+    // END TEMP
 
     function query(sentence) {
         // check for sentence word by word in list (hashtable)
