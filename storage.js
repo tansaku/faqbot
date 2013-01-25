@@ -24,7 +24,7 @@ function getStorage() {
         .prefix('dct', 'http://purl.org/dc/terms/');
 
     if (typeof(Storage) != "undefined") {
-        return new ChatbotStorage(databank, new PersistentStorage(databank));
+        return new ChatbotStorage(databank, new LocalStorage(databank));
     } else {
         alert("no web storage, using Transient storage");
         return new ChatbotStorage(databank, new TransientStorage(databank));
@@ -73,23 +73,23 @@ ChatbotStorage.prototype.save = function() {
  * Wrapper class using HTML5 storage. Need this because we can't seem to
  * return localStorage from functions
  */
-function PersistentStorage(db) {
+function LocalStorage(db) {
     this.databank = db;
 }
 
-PersistentStorage.prototype.getItem = function(key) {
+LocalStorage.prototype.getItem = function(key) {
     return localStorage.getItem(key);
 }
 
-PersistentStorage.prototype.setItem = function(key, value) {
+LocalStorage.prototype.setItem = function(key, value) {
     lcoalStorage.setItem(key, value)
 }
 
-PersistentStorage.prototype.getObject = function(key) {
+LocalStorage.prototype.getObject = function(key) {
     return localStorage.getObject(key);
 }
 
-PersistentStorage.prototype.setObject = function(key, value) {
+LocalStorage.prototype.setObject = function(key, value) {
     localStorage.setObject(key, value);
 }
 
