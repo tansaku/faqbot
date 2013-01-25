@@ -24,12 +24,50 @@ function getStorage() {
         .prefix('dct', 'http://purl.org/dc/terms/');
 
     if (typeof(Storage) != "undefined") {
-        return new PersistentStorage(databank);
+        return new ChatbotStorage(databank, new PersistentStorage(databank));
     } else {
         alert("no web storage, using Transient storage");
-        return new TransientStorage(databank);
+        return new ChatbotStorage(databank, new TransientStorage(databank));
     }
 }
+
+function ChatbotStorage(db, backend) {
+    this.databank = db;
+    this.backend = backend;
+    this.clearTranscript();
+}
+
+ChatbotStorage.prototype.getDatabank = function() {
+    return this.databank;
+}
+
+ChatbotStorage.prototype.isEmpty = function() {
+    return this.backend.getObject('rdf') == undefined;
+}
+
+ChatbotStorage.prototype.clearTranscript = function() {
+    this.transcript = [ ];
+}
+
+ChatbotStorage.prototype.addToTranscript = function(who, what) {
+    var entry =  { timestamp: new Date(), actor: who, text: what };
+    this.transcript.push(entry);
+}
+
+ChatbotStorage.prototype.load = function() {
+    var triples = this.backend.getObject('rdf');
+    this.databank = $.rdf(triples);
+    var ts = this.backend.getObject("transcript");
+    if (ts !== undefined) {
+        this.transcript = ts;
+    }
+}
+
+ChatbotStorage.prototype.save = function() {
+    this.backend.setObject("rdf", this.databank.dump());
+    this.backend.setObject("transcript", this.transcript);
+}
+
 
 /*
  * Wrapper class using HTML5 storage. Need this because we can't seem to
@@ -37,10 +75,6 @@ function getStorage() {
  */
 function PersistentStorage(db) {
     this.databank = db;
-}
-
-PersistentStorage.prototype.getDatabank = function() {
-    return this.databank;
 }
 
 PersistentStorage.prototype.getItem = function(key) {
@@ -59,11 +93,6 @@ PersistentStorage.prototype.setObject = function(key, value) {
     localStorage.setObject(key, value);
 }
 
-PersistentStorage.prototype.save = function() {
-    this.setObject("rdf", this.databank.dump());
-}
-
-
 /*
  * Fallback class to give us the illusion of storage if HTML5 storage is
  * not available - works until we refresh or leave the page.
@@ -72,11 +101,6 @@ function TransientStorage(db) {
     this.databank = db;
     this.store = new Object();
 }
-
-TransientStorage.prototype.getDatabank = function() {
-    return this.databank;
-}
-
 
 TransientStorage.prototype.getItem = function(key) {
     return this.store[key];
@@ -94,6 +118,3 @@ TransientStorage.prototype.setObject = function(key, value) {
     this.setItem(key, value);
 }
 
-TransientStorage.prototype.save = function() {
-    this.setObject("rdf", this.databank.dump());
-}

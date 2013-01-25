@@ -2,17 +2,12 @@ $(document).ready(function () {
     // get the object we'll use for persistent storage
     var storage = getStorage();
 
-    // We'll use the FOAF vocabularly to represent people
-    // http://en.wikipedia.org/wiki/FOAF_%28software%29
+    storage.setObject('temp', new Object());
+    initStorage(storage);
 
     // TEMP
     // couple of tests to see if storage and RDF is working
-    // add some people to the databank
-    storage.getDatabank()
-        .add('_:sam a foaf:Person .')
-        .add('_:sam foaf:name "Sam Joseph" .')
-        .add('_:dave a foaf:Person .')
-        .add('_:dave foaf:name "Dave Snowdon" .');
+
 
     // run a query to find people and their names
     var options = { }
@@ -59,17 +54,48 @@ $(document).ready(function () {
         return response;
     }
     
-    function updateHistory(sentence) {
-        $("div#history").append(sentence);
+    function updateHistory(who, sentence) {
+        var prefix = '';
+        if (who == 'bot') {
+            prefix = 'Bot: ';
+        } else if (who == 'human') {
+            prefix = 'You: ';
+        }
+
+        var fmt = '<span class="' + who +'">'+prefix+sentence+'</span><br/>';
+        $("div#history").append(fmt);
     }
     
+    function showResponse(who, what) {
+        storage.addToTranscript(who, what);
+        updateHistory(who, what);
+    }
+
     function handleChat(sentence) {
-        updateHistory("You: " + sentence + "<br/>");
-        updateHistory("Bot: " + query(sentence) + "<br/>");
+        showResponse('human', sentence + "<br/>");
+        showResponse('bot', query(sentence) + "<br/>");
          
         return false;
     }
-    
+
+    // If storage is empty (this is the first time we are called) then
+    // add some basic knowledge 
+    function initStorage(storage) {
+        if (storage.isEmpty()) {
+            // We'll use the FOAF vocabularly to represent people
+            // http://en.wikipedia.org/wiki/FOAF_%28software%29
+            storage.getDatabank()
+                .add('_:sam a foaf:Person .')
+                .add('_:sam foaf:name "Sam Joseph" .')
+                .add('_:dave a foaf:Person .')
+                .add('_:dave foaf:name "Dave Snowdon" .');
+            storage.save();
+        } else {
+            alert("we have data");
+            storage.load();
+        }
+    } 
+
     $("input#sentence").keypress(function(event) {
     if (event.which == 13) {
         event.preventDefault();
