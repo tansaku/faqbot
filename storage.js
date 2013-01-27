@@ -24,11 +24,15 @@ function getStorage() {
         .prefix('dct', 'http://purl.org/dc/terms/');
 
     if (typeof(Storage) != "undefined") {
-        return new ChatbotStorage(databank, new LocalStorage(databank));
+        return new ChatbotStorage(databank, new LocalStorage());
     } else {
         alert("no web storage, using Transient storage");
-        return new ChatbotStorage(databank, new TransientStorage(databank));
+        return new ChatbotStorage(databank, new TransientStorage());
     }
+}
+
+function trim1 (str) {
+    return str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
 }
 
 function ChatbotStorage(db, backend) {
@@ -42,7 +46,7 @@ ChatbotStorage.prototype.getDatabank = function() {
 }
 
 ChatbotStorage.prototype.isEmpty = function() {
-    return this.backend.getObject('rdf') == undefined;
+    return this.backend.getItem('rdf') == undefined;
 }
 
 ChatbotStorage.prototype.clearTranscript = function() {
@@ -55,16 +59,27 @@ ChatbotStorage.prototype.addToTranscript = function(who, what) {
 }
 
 ChatbotStorage.prototype.load = function() {
-    var triples = this.backend.getObject('rdf');
-    this.databank = $.rdf(triples);
+    var turtle = this.backend.getItem('rdf');
+    if (turtle !== null) {
+        // trim any whitespace
+        turtle = trim1(turtle);
+
+        // trim any surrounding double quotes
+        if (turtle.substring(0,1) === '"') {
+            turtle = turtle.substring(1, turtle.length-2);
+        }
+        this.databank.load(turtle, { format: 'text/turtle'});
+    }
+
     var ts = this.backend.getObject("transcript");
-    if (ts !== undefined) {
+    if (ts != null) {
         this.transcript = ts;
     }
 }
 
 ChatbotStorage.prototype.save = function() {
-    this.backend.setObject("rdf", this.databank.dump());
+    var turtle = this.databank.dump({ format: 'text/turtle'});
+    this.backend.setItem("rdf", turtle);
     this.backend.setObject("transcript", this.transcript);
 }
 
@@ -73,8 +88,7 @@ ChatbotStorage.prototype.save = function() {
  * Wrapper class using HTML5 storage. Need this because we can't seem to
  * return localStorage from functions
  */
-function LocalStorage(db) {
-    this.databank = db;
+function LocalStorage() {
 }
 
 LocalStorage.prototype.getItem = function(key) {
@@ -82,7 +96,7 @@ LocalStorage.prototype.getItem = function(key) {
 }
 
 LocalStorage.prototype.setItem = function(key, value) {
-    lcoalStorage.setItem(key, value)
+    localStorage.setItem(key, value)
 }
 
 LocalStorage.prototype.getObject = function(key) {
@@ -97,8 +111,7 @@ LocalStorage.prototype.setObject = function(key, value) {
  * Fallback class to give us the illusion of storage if HTML5 storage is
  * not available - works until we refresh or leave the page.
  */
-function TransientStorage(db) {
-    this.databank = db;
+function TransientStorage() {
     this.store = new Object();
 }
 

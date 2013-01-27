@@ -2,23 +2,7 @@ $(document).ready(function () {
     // get the object we'll use for persistent storage
     var storage = getStorage();
 
-    storage.setObject('temp', new Object());
     initStorage(storage);
-
-    // TEMP
-    // couple of tests to see if storage and RDF is working
-
-
-    // run a query to find people and their names
-    var options = { }
-    options.databank = storage.getDatabank();
-    $.rdf(options)
-        .where('?person a foaf:Person')
-        .where('?person foaf:name ?name')
-        .each(function() {
-            updateHistory('Found person: ' + this.name.value+"<br/>");
-         });
-    // END TEMP
 
     function query(sentence) {
         // check for sentence word by word in list (hashtable)
@@ -82,16 +66,12 @@ $(document).ready(function () {
     // add some basic knowledge 
     function initStorage(storage) {
         if (storage.isEmpty()) {
-            // We'll use the FOAF vocabularly to represent people
-            // http://en.wikipedia.org/wiki/FOAF_%28software%29
-            storage.getDatabank()
-                .add('_:sam a foaf:Person .')
-                .add('_:sam foaf:name "Sam Joseph" .')
-                .add('_:dave a foaf:Person .')
-                .add('_:dave foaf:name "Dave Snowdon" .');
-            storage.save();
+            // load the initial knowledge base from a text file in turtle format
+            $.get('initial_kb.txt', function(turtle) {
+                storage.getDatabank().load(turtle, { format: 'text/turtle'});
+                storage.save();
+            }, 'text');
         } else {
-            alert("we have data");
             storage.load();
         }
     } 
