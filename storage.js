@@ -45,6 +45,10 @@ ChatbotStorage.prototype.getDatabank = function() {
     return this.databank;
 }
 
+ChatbotStorage.prototype.getTranscript = function() {
+    return this.transcript;
+}
+
 ChatbotStorage.prototype.isEmpty = function() {
     return this.backend.getItem('rdf') == undefined;
 }

@@ -4,6 +4,8 @@ $(document).ready(function () {
 
     initStorage(storage);
 
+    showTranscript(storage);
+
     function query(sentence) {
         // check for sentence word by word in list (hashtable)
         var words = sentence.split(" ");
@@ -58,6 +60,7 @@ $(document).ready(function () {
     function handleChat(sentence) {
         showResponse('human', sentence + "<br/>");
         showResponse('bot', query(sentence) + "<br/>");
+        storage.save();
          
         return false;
     }
@@ -75,6 +78,16 @@ $(document).ready(function () {
             storage.load();
         }
     } 
+
+    function showTranscript(storage) {
+        var transcript = storage.getTranscript();
+        if (transcript.length > 0) {
+            for (var i=0; i<transcript.length; ++i) {
+                // TODO: show timestamps for old chats
+                updateHistory(transcript[i].actor, transcript[i].text);
+            }
+        }
+    }
 
     $("input#sentence").keypress(function(event) {
     if (event.which == 13) {
