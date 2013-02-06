@@ -43,8 +43,8 @@ $(document).ready(function () {
                we'd need a way to recognise existing entities.
             */
             storage.getDatabank()
-                .add(quote(match.name + ' a ' + quote(match.object)))
-                .add(quote(match.name) + ' foaf:name ' + quote(match.name))
+                .add(stringToResource(match.name) + ' a ' + quote(match.object))
+                .add(stringToResource(match.name) + ' foaf:name ' + quote(match.name))
         }
         return response;
     }
@@ -113,6 +113,11 @@ $(document).ready(function () {
                 updateHistory(transcript[i].actor, transcript[i].text);
             }
         }
+    }
+
+    function stringToResource(s) {
+//	return '_:' + s.replace(' ', '_').replace('\'', '').replace.('"','');
+	return '_:' + s;
     }
 
     function quote(s) {
