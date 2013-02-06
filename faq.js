@@ -1,4 +1,10 @@
 $(document).ready(function () {
+    // get the object we'll use for persistent storage
+    var storage = getStorage();
+
+    initStorage(storage);
+
+    showTranscript(storage);
 
     function query(sentence) {
         // check for sentence word by word in list (hashtable)
@@ -29,22 +35,95 @@ $(document).ready(function () {
         var match = XRegExp.exec(sentence, assert)
         // want to check is match is undefined or not ...
         var response = "OK";
-        if(match !== null)
+        if(match !== null) {
             response = match.name + ' is a ' +match.object;
+            /* bit ugly using the name as identifier, might be better
+               to use something like a GUID to represent new entities
+               and name them using a separate foaf:name triple. However, then
+               we'd need a way to recognise existing entities.
+            */
+            storage.getDatabank()
+                .add(stringToResource(match.name) + ' a ' + quote(match.object))
+                .add(stringToResource(match.name) + ' foaf:name ' + quote(match.name))
+        }
         return response;
     }
     
-    function updateHistory(sentence) {
-        $("div#history").append(sentence);
+    function updateHistory(who, sentence) {
+        var prefix = '';
+        if (who == 'bot') {
+            prefix = 'Bot: ';
+        } else if (who == 'human') {
+            prefix = 'You: ';
+        }
+
+        var fmt = '<span class="' + who +'">'+prefix+sentence+'</span><br/>';
+        $("div#history").append(fmt);
     }
     
+    function showResponse(who, what) {
+        storage.addToTranscript(who, what);
+        updateHistory(who, what);
+    }
+
+    /*
+     * handle commands to the bot that should not appear in the transcipt or
+     * affect the KB.
+     */
+    function handleCommand(sentence) {
+        if (sentence == 'show kb') {
+            alert(storage.getKnowledgeBaseAsText());
+        } else if (sentence == 'show transcript') {
+            alert(storage.getTranscript());
+        } else {
+            return false; // was not a command
+        }
+    }
+
     function handleChat(sentence) {
-        updateHistory("You: " + sentence + "<br/>");
-        updateHistory("Bot: " + query(sentence) + "<br/>");
+        if (!handleCommand(sentence)) {
+            showResponse('human', sentence + "<br/>");
+            showResponse('bot', query(sentence) + "<br/>");
+            storage.save();
+        }
          
         return false;
     }
-    
+
+    // If storage is empty (this is the first time we are called) then
+    // add some basic knowledge 
+    function initStorage(storage) {
+        if (storage.isEmpty()) {
+            // load the initial knowledge base from a text file in turtle format
+            $.get('initial_kb.txt', function(turtle) {
+                storage.loadKnowledgeBaseFromString(turtle);
+                alert("from local file: " + turtle);
+                storage.save();
+            }, 'text');
+        } else {
+            storage.load();
+        }
+    } 
+
+    function showTranscript(storage) {
+        var transcript = storage.getTranscript();
+        if (transcript.length > 0) {
+            for (var i=0; i<transcript.length; ++i) {
+                // TODO: show timestamps for old chats
+                updateHistory(transcript[i].actor, transcript[i].text);
+            }
+        }
+    }
+
+    function stringToResource(s) {
+//	return '_:' + s.replace(' ', '_').replace('\'', '').replace.('"','');
+	return '_:' + s;
+    }
+
+    function quote(s) {
+        return '"' + s + '"';
+    }
+
     $("input#sentence").keypress(function(event) {
     if (event.which == 13) {
         event.preventDefault();
