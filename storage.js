@@ -49,6 +49,10 @@ ChatbotStorage.prototype.getTranscript = function() {
     return this.transcript;
 }
 
+ChatbotStorage.prototype.getKnowledgeBaseAsText = function() {
+    return this.backend.getItem('rdf');
+}
+
 ChatbotStorage.prototype.isEmpty = function() {
     return this.backend.getItem('rdf') == undefined;
 }
@@ -62,8 +66,12 @@ ChatbotStorage.prototype.addToTranscript = function(who, what) {
     this.transcript.push(entry);
 }
 
+ChatbotStorage.prototype.loadKnowledgeBaseFromString = function(turtle) {
+    this.databank.load(turtle, { format: 'text/turtle'});
+}
+
 ChatbotStorage.prototype.load = function() {
-    var turtle = this.backend.getItem('rdf');
+    var turtle = this.getKnowledgeBaseAsText();
     if (turtle !== null) {
         // trim any whitespace
         turtle = trim1(turtle);

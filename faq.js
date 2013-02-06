@@ -35,8 +35,17 @@ $(document).ready(function () {
         var match = XRegExp.exec(sentence, assert)
         // want to check is match is undefined or not ...
         var response = "OK";
-        if(match !== null)
+        if(match !== null) {
             response = match.name + ' is a ' +match.object;
+            /* bit ugly using the name as identifier, might be better
+               to use something like a GUID to represent new entities
+               and name them using a separate foaf:name triple. However, then
+               we'd need a way to recognise existing entities.
+            */
+            storage.getDatabank()
+                .add(quote(match.name + ' a ' + quote(match.object)))
+                .add(quote(match.name) + ' foaf:name ' + quote(match.name))
+        }
         return response;
     }
     
@@ -57,10 +66,26 @@ $(document).ready(function () {
         updateHistory(who, what);
     }
 
+    /*
+     * handle commands to the bot that should not appear in the transcipt or
+     * affect the KB.
+     */
+    function handleCommand(sentence) {
+        if (sentence == 'show kb') {
+            alert(storage.getKnowledgeBaseAsText());
+        } else if (sentence == 'show transcript') {
+            alert(storage.getTranscript());
+        } else {
+            return false; // was not a command
+        }
+    }
+
     function handleChat(sentence) {
-        showResponse('human', sentence + "<br/>");
-        showResponse('bot', query(sentence) + "<br/>");
-        storage.save();
+        if (!handleCommand(sentence)) {
+            showResponse('human', sentence + "<br/>");
+            showResponse('bot', query(sentence) + "<br/>");
+            storage.save();
+        }
          
         return false;
     }
@@ -71,7 +96,8 @@ $(document).ready(function () {
         if (storage.isEmpty()) {
             // load the initial knowledge base from a text file in turtle format
             $.get('initial_kb.txt', function(turtle) {
-                storage.getDatabank().load(turtle, { format: 'text/turtle'});
+                storage.loadKnowledgeBaseFromString(turtle);
+                alert("from local file: " + turtle);
                 storage.save();
             }, 'text');
         } else {
@@ -87,6 +113,10 @@ $(document).ready(function () {
                 updateHistory(transcript[i].actor, transcript[i].text);
             }
         }
+    }
+
+    function quote(s) {
+        return '"' + s + '"';
     }
 
     $("input#sentence").keypress(function(event) {
