@@ -3,29 +3,18 @@
 <head>
   <meta charset="utf-8">
   <title>QUnit basic example</title>
-  <link rel="stylesheet" localhref="qunit-1.10.0.css" href="http://code.jquery.com/qunit/qunit-1.10.0.css">
+  <link rel="stylesheet" href="qunit-1.10.0.css" remotehref="http://code.jquery.com/qunit/qunit-1.10.0.css">
 </head>
 <body>
   <div id="qunit"></div>
-  <div id="qunit-fixture"></div>  
-  <script localsrc="../NaturalJS/natural.js" src="https://raw.github.com/tansaku/NaturalJS/master/natural.js"></script>
+  <div id="qunit-fixture"></div> 
+  <script src="jquery-1.7.1.js"></script>
+  <script src="jquery.icndb.js"></script> 
+  <script src="../NaturalJS/natural.js" remotesrc="https://raw.github.com/tansaku/NaturalJS/master/natural.js"></script>
+  <script src="qunit-1.10.0.js" remotesrc="http://code.jquery.com/qunit/qunit-1.10.0.js"></script>
+  <script src="xregexp.js"></script>
+  <script src="query.js"></script>
   <script src="faq.js"></script>
-  <script localsrc="qunit-1.10.0.js" src="http://code.jquery.com/qunit/qunit-1.10.0.js"></script>
-  <script>
-    test( "a basic test example", function() {
-      var value = "hello";
-      equal( value, "hello", "We expect value to be hello" );
-    });
-    test(  "testing NLP", function() {  
-      var sentence = "There is a game engine Unreal Engine";
-      var result = query(sentence);
-      equal( result, "OK", "We expect value to be OK" );
-      // "game_engines", "Unreal Engine", {"name":"Unreal Engine","ident":"Unreal Engine"})
-      });
-    test(  "testing Natural", function() { 
-      var result = natural.SoundEx.compare('phone', 'pone'); 
-      equal( result, true, "We expect value to be true" );
-     });
-  </script>
+  <script src="tests.js" ></script>
 </body>
 </html>
