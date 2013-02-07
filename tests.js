@@ -6,7 +6,7 @@ test( "a basic test example", function() {
 test(  "testing NLP", function() {  
   var sentence = "There is a game engine Unreal Engine";
   var result = query(sentence);
-  equal( result, "OK", "We expect value to be OK" );
+  equal( result, "what was that?");
   // "game_engines", "Unreal Engine", {"name":"Unreal Engine","ident":"Unreal Engine"})
   });
 var sentences = [];

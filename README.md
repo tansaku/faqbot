@@ -57,3 +57,7 @@ Open Issues:
 Background
 
 The current design of this system arises from an earlier attempt to implement the same approach in Python with the NLTK.  This worked fine, except that it was not straightforward to install support for the NLTK on a cloud hosting service like Heroku.  Also it seemed that members of the project were unlikely to download and hack on a python project that meant getting set up with NLTK locally.  It seemed that if we made available a pure HTML interface that didn't rely on having particular software libraries installed on a server, and that chatting to the bot would mirror the process of generating unit tests for it's operation, then it might be easier to get more people involved.  Ultimately the project can use any technology, but it makes sense to get some serious prototyping done by making simple versions of the system as accessible as possible.
+
+Running with chrome
+
+if running the faqbot with chrome locally from the filesystem, chrome will need to be launched with the --allow-access-from-files flag
