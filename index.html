@@ -3,56 +3,29 @@
 <head>
   <meta charset="utf-8">
   <title>QUnit basic example</title>
-  <link rel="stylesheet" href="qunit-1.10.0.css" localhref="http://code.jquery.com/qunit/qunit-1.10.0.css">
+  <link rel="stylesheet" localhref="thirdparty/qunit-1.10.0.css" href="http://code.jquery.com/qunit/qunit-1.10.0.css">
 </head>
 <body>
-  <div id="qunit"></div>
-  <div id="qunit-fixture"></div>  
-  <script src="natural.js" remotesrc="https://raw.github.com/amitamb/NaturalJS/master/natural.js"></script>
-  <script src="faq.js"></script>
-  <script src="qunit-1.10.0.js" remotesrc="http://code.jquery.com/qunit/qunit-1.10.0.js"></script>
-  <script>
-    test( "a basic test example", function() {
-      var value = "hello";
-      equal( value, "hello", "We expect value to be hello" );
-    });
-    test(  "testing NLP", function() {  
-      var sentence = "There is a game engine Unreal Engine";
-      var result = query(sentence);
-      equal( result, "OK", "We expect value to be OK" );
-      // "game_engines", "Unreal Engine", {"name":"Unreal Engine","ident":"Unreal Engine"})
-      });
-    test(  "testing split", function() {  
-      var sentence = "There is a game engine Unreal Engine";
-      var result = split(sentence);
-      deepEqual( result, [ "There","is","a","game","engine","Unreal","Engine"], "We expect value to be an array of words" );
-      // "game_engines", "Unreal Engine", {"name":"Unreal Engine","ident":"Unreal Engine"})
-      });
-    test(  "testing Natural SoundEx Compare", function() { 
-      var result = natural.SoundEx.compare('phone', 'pone'); 
-      equal( result, true, "We expect value to be true" );
-     });
-    test(  "testing Natural SoundsLike", function() { 
-      phonetic = natural.Metaphone;
-      phonetic.attach();
-      var result = 'phonetics'.soundsLike('fonetix'); 
-      equal( result, true, "We expect value to be true" );
-     });
-    test(  "testing Natural Sentences", function() { 
-      tokenizer = new natural.TreebankWordTokenizer();
-      var result = tokenizer.tokenize("my dog hasn't any flees.")
-      deepEqual( result, [ 'my', 'dog', 'has', 'n\'t', 'any', 'flees', '.' ], "We expect value to be tokenized" );
-     });
-    test(  "testing Regex Sentence split", function() { 
-      var sentence = "There is a game engine Unreal Engine";
-      var result = sentence.match(/There is an? ([a-z\s]+) ([A-Z]][\w\s]+)( called ([\s\w]+)\.?)?/);
-      console.log(result);
-      //debugger
-      notEqual(result, null,'result should not be null');
-      equal(result[0], "There is a game engine Unreal Engine");
-      equal(result[1], "game engine");
-      equal(result[2], "Unreal Engine");
-     });
-  </script>
+	<div id="qunit"></div>
+	<div id="qunit-fixture"></div>  
+	<script type="text/javascript" src="thirdparty/jquery-1.7.1.js"></script>
+	<script type="text/javascript" src="thirdparty/jquery.uri.js"></script>
+	<script type="text/javascript" src="thirdparty/jquery.xmlns.js"></script>
+	<script type="text/javascript" src="thirdparty/jquery.curie.js"></script>
+	<script type="text/javascript" src="thirdparty/jquery.datatype.js"></script>
+	<script type="text/javascript" src="thirdparty/jquery.rdf.js"></script>
+	<script type="text/javascript" src="thirdparty/jquery.rdfa.js"></script>
+	<script type="text/javascript" src="thirdparty/jquery.rules.js"></script>
+	<script type="text/javascript" src="thirdparty/jquery.rdf.json.js"></script>
+	<script type="text/javascript" src="thirdparty/jquery.rdf.turtle.js"></script>
+	<script type="text/javascript" src="thirdparty/jquery.icndb.js"></script>
+	<script type="text/javascript" src="thirdparty/xregexp.js"></script>
+	<script type="text/javascript" src="thirdparty/natural.js"></script>
+	<script src="storage.js"></script>
+	<script src="faq.js"></script>
+	<script src="thirdparty/qunit-1.10.0.js"></script>
+	<script src="query.js"></script>
+	<script src="tests.js" ></script>
+>>>>>>> 53ff1b928c0b0d2ce188712749bc920fde4c95d4
 </body>
 </html>
