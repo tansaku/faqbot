@@ -6,3 +6,7 @@ function query(sentence){
 
 	return "OK";
 };
+
+function split(sentence){
+	return sentence.split(" ");
+};
