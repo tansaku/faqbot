@@ -53,17 +53,36 @@ function query(sentence) {
            and name them using a separate foaf:name triple. However, then
            we'd need a way to recognise existing entities.
         */
+        name = match.name.replace(' ','_');
         storage.getDatabank()
-            .add(stringToResource(match.name) + ' a ' + quote(match.object))
-            .add(stringToResource(match.name) + ' foaf:name ' + quote(match.name))
+            .add(stringToResource(name) + ' a ' + quote(match.object))
+            .add(stringToResource(name) + ' foaf:name ' + quote(name))
     }
     else{
          // want to query - can we do stop lists?
         response = 'what was that?';
         var databank = storage.getDatabank();
         var words = sentence.removeStopWords().split(' ')
+        var bigrams = natural.NGrams.bigrams(words);
+        for(var i in bigrams){
+          words.push(bigrams[i].join('_'));
+        }
         // http://code.google.com/p/rdfquery/wiki/RdfPlugin
         // not sure how to query the rdf store ....
+
+        //$.rdf({databank:databank}).where('?name a ?type').select(['name','type'])
+        //$.rdf({databank:databank}).where('?name a ?type').select(['name','type'])
+        //debugger
+        var type = '';
+        var result = {};
+        for(var i in words){
+          result = $.rdf({databank:databank}).where('_:'+words[i]+' a ?type').select(['type'])[0];
+          if(result !== undefined){
+            response = "I know that "+words[i].replace('_',' ')+" is a " + result.type.value;
+            break;
+          }
+        }
+        
     }
        
     /*
