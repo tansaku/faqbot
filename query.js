@@ -64,7 +64,6 @@ function query(sentence) {
         var words = sentence.removeStopWords().split(' ')
         // http://code.google.com/p/rdfquery/wiki/RdfPlugin
         // not sure how to query the rdf store ....
- 
     }
        
     /*
