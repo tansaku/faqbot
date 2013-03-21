@@ -3,6 +3,8 @@ faqbot
 
 JavaScript chat bot to answer frequently asked questions (faq)
 
+Preview the bot here: [http://htmlpreview.github.com/?https://github.com/tansaku/faqbot/blob/master/faq.html](http://htmlpreview.github.com/?https://github.com/tansaku/faqbot/blob/master/faq.html)
+
 ----
 
 Most Natural Language Processing (NLP) approaches seem to be focused on how to parse sentences - not on how to construct sentences that match some model of the world (notable exception is SHRDLU)
