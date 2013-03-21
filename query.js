@@ -59,29 +59,7 @@ function query(sentence) {
             .add(stringToResource(name) + ' foaf:name ' + quote(name))
     }
     else{
-         // want to query - can we do stop lists?
-        response = 'what was that?';
-        var databank = storage.getDatabank();
-        var words = sentence.removeStopWords().split(' ')
-        var bigrams = natural.NGrams.bigrams(words);
-        for(var i in bigrams){
-          words.push(bigrams[i].join('_'));
-        }
-        // http://code.google.com/p/rdfquery/wiki/RdfPlugin
-        // not sure how to query the rdf store ....
-
-        //$.rdf({databank:databank}).where('?name a ?type').select(['name','type'])
-        //$.rdf({databank:databank}).where('?name a ?type').select(['name','type'])
-        //debugger
-        var type = '';
-        var result = {};
-        for(var i in words){
-          result = $.rdf({databank:databank}).where('_:'+words[i]+' a ?type').select(['type'])[0];
-          if(result !== undefined){
-            response = "I know that "+words[i].replace('_',' ')+" is a " + result.type.value;
-            break;
-          }
-        }
+      response = handleQuestion(sentence);
         
     }
        
@@ -96,6 +74,40 @@ function query(sentence) {
       }
     }); */
     // $.icndb.getRandomJoke(12) // this was for chuck norris
+    return response;
+}
+
+// TODO add this to String itself e.g. String.prototype.removeStopWords = function()
+function removePunctuation(sentence){
+    return sentence.replace(/[^\w\s]/g,'');
+}
+
+function handleQuestion(sentence) {
+       // want to query - can we do stop lists?
+    response = 'what was that?';
+    var databank = storage.getDatabank();
+    sentence = removePunctuation(sentence); // could get this function in String itself
+    var words = sentence.removeStopWords().split(' ');
+
+    var bigrams = natural.NGrams.bigrams(words);
+    for(var i in bigrams){
+      words.push(bigrams[i].join('_'));
+    }
+    // http://code.google.com/p/rdfquery/wiki/RdfPlugin
+    // not sure how to query the rdf store ....
+
+    //$.rdf({databank:databank}).where('?name a ?type').select(['name','type'])
+    //$.rdf({databank:databank}).where('?name a ?type').select(['name','type'])
+    //debugger
+    var type = '';
+    var result = {};
+    for(var i in words){
+      result = $.rdf({databank:databank}).where('_:'+words[i]+' a ?type').select(['type'])[0];
+      if(result !== undefined){
+        response = "I know that "+words[i].replace('_',' ')+" is a " + result.type.value;
+        break;
+      }
+    }
     return response;
 }
 
