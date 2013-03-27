@@ -6,19 +6,52 @@ describe("FaqBot", function() {
     expect(query("There is a game engine Unreal Engine")).toEqual("what was that?");
   });
 
-  
-  sentences[0] = "There is a game engine called Unreal Engine";
-  answers[0] = "Unreal Engine is a game engine";
-  sentences[1] = "There is a horse called Matilda";
-  answers[1] = "Matilda is a horse";
-  sentences[2] = "There is a course called ML";
-  answers[2] = "ML is a course";
+  // TODO ideally all this data would be in starting knowledge base for bot as well?
+  // would be nice if we had this in some separate file perhaps? fixture? !!
+  sentences.push("There is a game engine called Unreal Engine");
+  answers.push("Unreal Engine is a game engine");
+  // should be pushing some expected knowledge structure on here
+  sentences.push("There is a horse called Matilda");
+  answers.push("Matilda is a horse");
+  sentences.push("There is a course called ML");
+  answers.push("ML is a course");
+  sentences.push("Gandalf is a wizard");
+  answers.push("Gandalf is a wizard");
+  sentences.push("Unreal Engine has a website http://unrealengine.com");
+  answers.push("The website for Unreal Engine is http://unrealengine.com");
+
+  sentences.push("There is a game engine called Unity3D");
+  answers.push("Unity3D is a game engine");
+  sentences.push("Unity3D has a URL of http://www.studica.com/unity");
+  answers.push("The URL for Unreal Engine is http://www.studica.com/unity");
+  sentences.push("Unity3D has a type of integrated");
+  answers.push("The type for Unreal Engine is integrated");
+  sentences.push("Unity3D has a typeof 3D");
+  answers.push("The type for Unity3D is 3D");
+  sentences.push("What type of game engine is Unity3D?");
+  answers.push("The type for Unity3D is '3D'")
+
+  sentences.push("There is a game engine Crysis");
+  answers.push("Crysis is a game engine");
+
+  sentences.push("There is a game engine Source");
+  answers.push("Source is a game engine");
+  sentences.push("Source has a URL of http://source.valvesoftware.com/sourcesdk/sourceu.php");
+  answers.push("The URL for Source is http://source.valvesoftware.com/sourcesdk/sourceu.php");
+
+
+  var checkAnswer = function(i){
+    it( "should respond to \""+sentences[i] + "\" with --> \"" + answers[i]+ "\"", function() {  
+        expect(query(sentences[i])).toEqual(answers[i]);
+        // ideally we should be checking that data is stored in knowledge base ...
+        // and dumping the knowledge base on each test iteration here ...
+      });
+  }
 
   for (var i in sentences){
-    it( "should respond to \""+sentences[i] + "\" with --> \"" + answers[i]+ "\"", function() {  
-      expect(query(sentences[i])).toEqual(answers[i]);
-    });
+    checkAnswer(i);
   }
+  
 
 
   it("should remove punctuation", function() {
