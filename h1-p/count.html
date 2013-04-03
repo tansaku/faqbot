@@ -1,0 +1,41 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <title>Count Stuff</title>
+
+  <link rel="shortcut icon" type="image/png" href="../thirdparty/jasmine-standalone-1.3.1/lib/jasmine-1.3.1/jasmine_favicon.png">
+  <link rel="stylesheet" type="text/css" href="../thirdparty/jasmine-standalone-1.3.1/lib/jasmine-1.3.1/jasmine.css">
+  <script type="text/javascript" src="../thirdparty/jasmine-standalone-1.3.1/lib/jasmine-1.3.1/jasmine.js"></script>
+  <script type="text/javascript" src="../thirdparty/jasmine-standalone-1.3.1/lib/jasmine-1.3.1/jasmine-html.js"></script>
+
+  <!-- include source files here... -->
+  <script type="text/javascript" src="../thirdparty/jasmine-standalone-1.3.1/src/Player.js"></script>
+  <script type="text/javascript" src="../thirdparty/jasmine-standalone-1.3.1/src/Song.js"></script>
+
+  <script type="text/javascript" src="../thirdparty/jquery-1.7.1.js"></script>
+
+  <script src="viterbi.js"></script>
+
+  <div id="output"><br/></div>
+  <script type="text/javascript">
+    (function() {
+      callAjax(function(data){
+        word_tags = count(data).word_tags;
+        for(var word in word_tags){
+          for(var category in word_tags[word]){
+            $("div#output").append(word_tags[word][category]+ 
+              ' WORD_TAG '+category+' '+word+'<br/>');
+          }
+        }
+        // need to output n-gram counts
+      },'gene.train');
+    })();
+  </script>
+ 
+
+</head>
+
+<body>
+</body>
+</html>

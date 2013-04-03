@@ -15,7 +15,7 @@ describe("FaqBot", function() {
   answers.push("Matilda is a horse");
   sentences.push("There is a course called ML");
   answers.push("ML is a course");
-  sentences.push("Gandalf is a wizard");
+  sentences.push("Gandalf is a wizard"); // will require new regex - next step extract existing one
   answers.push("Gandalf is a wizard");
   sentences.push("Unreal Engine has a website http://unrealengine.com");
   answers.push("The website for Unreal Engine is http://unrealengine.com");
