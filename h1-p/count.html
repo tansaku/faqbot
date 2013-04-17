@@ -21,15 +21,41 @@
   <script type="text/javascript">
     (function() {
       callAjax(function(data){
-        word_tags = count(data).word_tags;
+        var c = count(data);
+        word_tags = c.word_tags;
         for(var word in word_tags){
           for(var category in word_tags[word]){
             $("div#output").append(word_tags[word][category]+ 
               ' WORD_TAG '+category+' '+word+'<br/>');
           }
         }
+        debugger
+        grams = c.grams;
+        // feel like we are reaching the limits of what we can do here generically
+        // limit of assembling data structures, rather can creating classes?
+        // of should be be using functional paradigm
+        for(var category in grams['1']){
+            $("div#output").append(grams['1'][category]+ 
+              ' 1-GRAM '+category+'<br/>');
+        }
+        for(var category in grams['2']){
+          for(var category2 in grams['2'][category]){
+            $("div#output").append(grams['2'][category][category2]+ 
+              ' 2-GRAM '+category+' '+category2+'<br/>');
+          }
+        }
+
+        for(var category in grams['3']){
+          for(var category2 in grams['3'][category]){
+            for(var category3 in grams['3'][category][category2]){
+              $("div#output").append(grams['3'][category][category2][category3]+ 
+                ' 3-GRAM '+category+' '+category2+' '+category3+'<br/>');
+            }
+          }
+        }
+
         // need to output n-gram counts
-      },'gene.train');
+      },'gene.train.head2');
     })();
   </script>
  
