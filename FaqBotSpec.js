@@ -15,11 +15,11 @@ describe("FaqBot", function() {
   answers.push("Matilda is a horse");
   sentences.push("There is a course called ML");
   answers.push("ML is a course");
-  sentences.push("Gandalf is a wizard"); // will require new regex - next step extract existing one
-  answers.push("Gandalf is a wizard");
+  //sentences.push("Gandalf is a wizard"); // will require new regex - next step extract existing one
+  //answers.push("Gandalf is a wizard");
   sentences.push("Unreal Engine has a website http://unrealengine.com");
   answers.push("The website for Unreal Engine is http://unrealengine.com");
-
+/*
   sentences.push("There is a game engine called Unity3D");
   answers.push("Unity3D is a game engine");
   sentences.push("Unity3D has a URL of http://www.studica.com/unity");
@@ -38,7 +38,7 @@ describe("FaqBot", function() {
   answers.push("Source is a game engine");
   sentences.push("Source has a URL of http://source.valvesoftware.com/sourcesdk/sourceu.php");
   answers.push("The URL for Source is http://source.valvesoftware.com/sourcesdk/sourceu.php");
-
+*/
 
   var checkAnswer = function(i){
     it( "should respond to \""+sentences[i] + "\" with --> \"" + answers[i]+ "\"", function() {  
@@ -52,6 +52,27 @@ describe("FaqBot", function() {
     checkAnswer(i);
   }
   
+
+  it("should match properties regex", function() {
+    // websites have URLs
+    var result = matchPropertiesRegex("Unreal Engine has a website http://unrealengine.com");
+    expect(result).toNotEqual(null);
+    expect(result).toNotEqual(undefined);
+    expect(result.object).toEqual("Unreal Engine");
+    expect(result.relation).toEqual("website");
+    expect(result.name).toEqual("http://unrealengine.com");
+  });
+
+  it("should be able to store properties relations", function() {
+    var object = 'Unreal Engine';
+    var relation = 'website';
+    var name = 'http://unrealengine.com';
+    var real_name = "Unreal_Engine";
+    storeProperty(object, relation, name);
+    var databank = storage.getDatabank();
+    var result = $.rdf({databank:databank}).where('_:'+real_name+' sam:website ?url').select(['url'])[0];
+    expect(result.url.value).toEqual(name);
+  });
 
 
   it("should remove punctuation", function() {

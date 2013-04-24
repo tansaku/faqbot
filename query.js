@@ -39,7 +39,7 @@ function query(sentence) {
     // a) Mobile is a new course
     // b) I heard that there's a new course called Mobile
     // c) Have you signed up for that new Mobile course?
-    var match = XRegExp.exec(sentence, assert)
+    var match = XRegExp.exec(sentence, assert);
     // want to check is match is undefined or not ...
     var response = "OK";
      console.log("test");
@@ -54,10 +54,27 @@ function query(sentence) {
         name = match.name.replace(' ','_');
         storage.getDatabank()
             .add(stringToResource(name) + ' a ' + quote(match.object))
-            .add(stringToResource(name) + ' foaf:name ' + quote(name))
+            .add(stringToResource(name) + ' foaf:name ' + quote(name));
+
+        // _:John a "person" ; foaf:name "John"    
+        // _:John _:favourite_colour "blue" ; foaf:name "blue"    
+        // _:favourite_color type_of_relation "between people"  ????  
+
+        // "John" a "person" ???
+        // foaf:name
+        // foaf:type ?
+
     }
-    else{
-      response = handleQuestion(sentence);
+    else {
+      var properties_match = matchPropertiesRegex(sentence);
+
+      if( properties_match !== null){
+         storeProperty(properties_match.object, properties_match.relation, properties_match.name);
+        return "The " + properties_match.relation +" for " + properties_match.object + " is " + properties_match.name;
+      }
+      else{
+        response = handleQuestion(sentence);
+      }
         
     }
        
@@ -73,6 +90,22 @@ function query(sentence) {
     }); */
     // $.icndb.getRandomJoke(12) // this was for chuck norris
     return response;
+}
+
+function matchPropertiesRegex(sentence){
+  //Unreal Engine has a website http://unrealengine.com  ---> _:Unreal_Engine has_a_website http://unrealengine.com
+  //Unreal Engine's website is http://unrealengine.com
+  var assert = XRegExp('(?<object> .+ ) \\s  # object \n' +
+                     '(?<has_a> has\\sa ) \\s  # has_a \n' +
+                     '(?<relation> .+ ) \\s  # relation \n' +
+                     '(?<name>   .+ )     # name     ', 'x');
+  return XRegExp.exec(sentence, assert);
+}
+
+function storeProperty(object, relation, name){
+  object = object.replace(' ','_');
+  storage.getDatabank()
+      .add(stringToResource(object) + ' sam:' + relation + ' ' + quote(name));
 }
 
 // TODO add this to String itself e.g. String.prototype.removeStopWords = function()
@@ -99,7 +132,9 @@ function handleQuestion(sentence) {
     //debugger
     var type = '';
     var result = {};
+    // TODO return all other relations for that thing, e.g. website etc.
     for(var i in words){
+      // _:John a ?type
       result = $.rdf({databank:databank}).where('_:'+words[i]+' a ?type').select(['type'])[0];
       if(result !== undefined){
         response = "I know that "+words[i].replace('_',' ')+" is a " + result.type.value;
