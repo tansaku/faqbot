@@ -3,8 +3,6 @@ var storage = getStorage();
 
 initStorage(storage);
 
-showTranscript(storage);
-
 function query(sentence) {
     // check for sentence word by word in list (hashtable)
     var words = sentence.split(" ");
