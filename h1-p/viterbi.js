@@ -24,73 +24,34 @@ function callAjax(callback,filename) {
 	});
 }
 
-function incrementOneGramCount(one_grams,category){
-    if(one_grams[category] === undefined){
-      one_grams[category] = 0;
-    }
-    one_grams[category]++;
-}
-
-function incrementTwoGramCount(two_grams,category_minus_one,category){
-    if(two_grams[category_minus_one] === undefined){
-      two_grams[category_minus_one] = {};
-    }
-    if(two_grams[category_minus_one][category] === undefined){
-      two_grams[category_minus_one][category] = 0;
-    }
-    two_grams[category_minus_one][category]++;
-}
-
-function incrementThreeGramCount(three_grams,category_minus_two,category_minus_one,category){
-    if(three_grams[category_minus_two] === undefined){
-      three_grams[category_minus_two] = {};
-    }
-    if(three_grams[category_minus_two][category_minus_one] === undefined){
-      three_grams[category_minus_two][category_minus_one] = {};
-    }
-    if(three_grams[category_minus_two][category_minus_one][category] === undefined){
-      three_grams[category_minus_two][category_minus_one][category] = 0;
-    }
-    three_grams[category_minus_two][category_minus_one][category]++;
-}
-
-
 // could have been testing this at a much lower level?
 function count(data){
 	// Comparison O
-	var word_tags = {};
-	var grams = {'1':{},'2':{},'3':{}};
+	var word_tags = new Hash({},0);
+	var grams = new Hash({1:{},2:{},3:{}},0);
 	var lines = data.split('\n');
 	var word, category; // could start with category being *, increment grams, and then ...
 	var category_minus_one = '*';
 	var category_minus_two = '*';
-	var c;
 	for(var i in lines){
 		//debugger
 		tokens = lines[i].split(' ');
 		word = tokens[0];
-		category = tokens[1];
+		category = tokens[1]; // e.g. 'O' or 'I-GENE'
 		if(word === ''){ // is this our sentence break identifier
 			category = 'STOP';
 		}
 		else{
-			if (word_tags[word] === undefined){
-			  word_tags[word] = {}; // e.g. 'mind' or 'resting'
-			}
-
-	        c = word_tags[word][category]; // eg. 'O' or 'I-GENE'
-	        c = (c === undefined ? 1 : c+1);
-	        word_tags[word][category] = c;
+			word_tags.set([word,category],word_tags.get([word,category])+1)
 		}
-		//
-        incrementOneGramCount(grams['1'],category);
-        incrementTwoGramCount(grams['2'],category_minus_one,category);
-        incrementThreeGramCount(grams['3'],category_minus_two,category_minus_one,category);
+        grams.set([1,category], grams.get([1,category])+1);
+        grams.set([2,category_minus_one,category], grams.get([2,category_minus_one,category])+1);
+        grams.set([3,category_minus_two,category_minus_one,category], grams.get([3,category_minus_two,category_minus_one,category])+1);
 
         if(category === 'STOP'){
         	category_minus_one = '*';
 			category_minus_two = '*';
-			incrementTwoGramCount(grams['2'],category_minus_two,category_minus_one);// HACK!!!!
+			grams.set([2,category_minus_two,category_minus_one], grams.get([2,category_minus_two,category_minus_one])+1);// HACK!!!!
         }
         else{
 	        category_minus_two = category_minus_one;
@@ -105,20 +66,20 @@ function count(data){
 
 	// so this function could be moved out of the larger one, tested independently perhaps
 	// currently relying on closing around the grams data object ...
+	// TODO pull these out
+	// TODO switch word_tags to using my hashes
 	result.hmm = function(z,y,x){
-		var numerator = 0;
-		if(result['grams']['3'][x] !== undefined && result['grams']['3'][x][y] !== undefined && result['grams']['3'][x][y][z] !== undefined){
-			numerator = result['grams']['3'][x][y][z];
-		}
-		var denominator = 1;
-		if(result['grams']['2'][x] !== undefined && result['grams']['2'][x][y] !== undefined ){
-			denominator = result['grams']['2'][x][y];;
+		var numerator = result['grams'].get(['3',x,y,z]);
+
+		var denominator = result['grams'].get(['2',x,y]);
+		if(denominator == 0 ){
+			return 0;
 		}
 		return numerator/denominator;
 	};
 	result.emission = function(x,y){
-		var c = result['word_tags'][x][y] || 0;
-		var d = result['grams']['1'][category] || 0;
+		var c = result['word_tags'].get([x,y]) || 0;
+		var d = result.get(['grams','1',category]); // this being wrong didn't trip a test ...
         return c/d;
 	}
 	return result;
@@ -131,23 +92,17 @@ function rarify(data,rareSymbol,rareThreshold){
 
    // seems like we should initialize the rare keyword
    // although rare should never be one I guess - makes no sense ...
-   for(var word in word_tags){
+   // TODO keys method for Hash object?
+   for(var word in word_tags.hash){
    	  var sum = 0;
-   	  for(var category in word_tags[word]){
-   	  	 sum+= word_tags[word][category];
+   	  for(var category in word_tags.get([word])){
+   	  	 sum+= word_tags.get([word,category]);
    	  }
    	  if(sum<rareThreshold){
-  		if(word_tags[rareSymbol] === undefined){
-  			word_tags[rareSymbol] = {};
-  		}
-   	  	 for(var category in word_tags[word]){
-
-   	  		if(word_tags[rareSymbol][category] === undefined){
-   	  			word_tags[rareSymbol][category] = 0;
-   	  		}
-   	  	    word_tags[rareSymbol][category] += word_tags[word][category];
+   	  	 for(var category in word_tags.get([word])){
+   	  	    word_tags.set([rareSymbol,category],word_tags.get([rareSymbol,category]) + word_tags.get([word,category]));
    	     }
-   	  	 delete word_tags[word];
+   	  	 word_tags.delete([word]);
    	  }
    }
    data.word_tags = word_tags;
@@ -184,11 +139,14 @@ function viterbi(sentence,result){
 	    // pi(k,u,v) = max_(w elementof S_k-2) (pi(k-1,w,u) x q(v|w,u) x e(x_k|v))
 	      var max = 0;
 	      var temp = 0;
+	      var temp_pi = 0;
 	      for(var w in getSet(k-2)){
-	      	// TODO would like pi.get to give us back 0 if
-	      	// there is no entry there ...
-	      	// really should pull out all these functions for testing
-            temp = pi.get([k-1,w,u]) * result.hmm(v,w,u) * result.emission(words[k],v);
+	      	// TODO really should pull out all these functions for testing
+	      	temp_pi = pi.get([k-1,w,u]);
+	      	if(temp_pi === undefined){
+	      		temp_pi = 0;
+	      	}
+            temp = temp_pi * result.hmm(v,w,u) * result.emission(words[k],v);
             if(temp > max){
             	max = temp;
             }
@@ -214,20 +172,19 @@ function viterbi(sentence,result){
 function tag(devData, result, rareSymbol){
 	var lines = devData.split('\n');
 	var word_tags = result.word_tags;
-	var one_grams = result.grams['1'];
 	for(var i in lines){
 		var word = lines[i];
 		// so I need the emission probabilities looked up by word
 		var highest = 0;
 		var output = '';
-        // if there is no entry for that word we need to assign using _RARE_
+        // if we haven't encountered word we need to assign using _RARE_
         if(word !== ''){
         	//debugger
-	        if(word_tags[word] === undefined){
+	        if(word_tags.get([word]) === 0){
 	        	word = rareSymbol;
 	        }
-			for(var category in word_tags[word]){
-				var emission = word_tags[word][category]/one_grams[category];
+			for(var category in word_tags.get([word])){
+				var emission = word_tags.get([word,category])/result.grams.get([1,category]);
 				if(emission > highest){
 					highest = emission;
 					output = category;

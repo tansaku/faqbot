@@ -1,12 +1,21 @@
 describe("Hash", function() {
-	var DEFAULT = {};
+	var DEFAULT = 0;
 
 	var hash;
 
 	beforeEach(function() {
-		hash = new Hash();
+		hash = new Hash({}, DEFAULT);
 	});
 
+	describe("starting state", function () {
+		it("should have starting state key/value pairs we pass in", function () {
+		    hash = new Hash({'1':'a','2':'b','3':'c'}, DEFAULT);
+		    expect(hash.get(['1'])).toEqual('a');
+		    expect(hash.get(['2'])).toEqual('b');
+		    expect(hash.get(['3'])).toEqual('c');
+		    expect(hash.get(['4'])).toEqual(DEFAULT);
+		});
+	});
 	describe("get", function () {
 		it("should get the default value", function () {
 		    expect(hash.get(['a'])).toEqual(DEFAULT);
@@ -15,8 +24,18 @@ describe("Hash", function() {
 		    expect(hash.get(['a','b'])).toEqual(DEFAULT);
 		});
 	});
-	describe("set", function () {
+	// TODO should check we throw an exception if get, delete or set is queried with something other than an array
+	describe("delete", function () {
+		it("should get the delete the appropriate value", function () {
+			var value = 12;
+			hash.set(['a'],value);
+		    expect(hash.get(['a'])).toEqual(value);
+		    hash.delete(['a']);
+		    expect(hash.get(['a'])).toEqual(DEFAULT);
+		});
 
+	});
+	describe("set", function () {
 		it("should get the set value", function () {
 			var value = 12;
 			hash.set(['a'],value);
