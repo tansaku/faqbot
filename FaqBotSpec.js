@@ -3,7 +3,7 @@ describe("FaqBot", function() {
   var answers = [];
 
   it("should respond as expected ", function() {
-    expect(query("There is a game engine Unreal Engine")).toEqual("what was that?");
+    expect(query("There is a game engine Unreal Engine")).toEqual("why?");
   });
 
   // TODO ideally all this data would be in starting knowledge base for bot as well?
