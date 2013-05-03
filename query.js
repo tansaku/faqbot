@@ -115,7 +115,7 @@ function removePunctuation(sentence){
 
 function handleQuestion(sentence) {
        // want to query - can we do stop lists?
-    response = 'what was that?';
+    response = 'why?';
     var databank = storage.getDatabank();
     sentence = removePunctuation(sentence); // could get this function in String itself
     var words = sentence.removeStopWords().split(' ');
