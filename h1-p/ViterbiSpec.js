@@ -130,15 +130,37 @@ of O\n";
        expect(tag(devData, result, rareKeyword)).toEqual(gene_key_head_direct.trim());
     });
 
-    it("should be able to calculate HMM Trigram probabilities", function() {
-       var c = count(trainingData);
-       expect(c.hmm('O','*','*')).toEqual(c.grams.get(['3','*','*','O'])/c.grams.get(['2','*','*']));
-       expect(c.hmm('I-GENE','*','*')).toEqual(0);
-       expect(c.hmm('I-GENE','I-GENE','*')).toEqual(0);
-       expect(c.hmm('STOP','I-GENE','I-GENE')).toEqual(1/3);
+    it("should be able to calculate HMM Conditional Trigram probabilities", function() {
+       grams = new Hash({1:{},2:{},3:{}},0);
+       grams.set(['3','*','*','O'],0.0);
+       grams.set(['2','*','*'],0.0);
+       expect(conditionalTrigramProbability('O','*','*',grams)).toEqual(0);
+       grams.set(['3','*','*','O'],0.1);
+       grams.set(['2','*','*'],0.5);
+       expect(conditionalTrigramProbability('O','*','*',grams)).toEqual(0.2);
     });
 
-    xit("should be able to compute the viterbi algorithm", function() {
+    it("should be able to calculate HMM Trigram probabilities given a count object", function() {
+       var c = count(trainingData);
+       var grams = c.grams;
+       expect(conditionalTrigramProbability('O','*','*',grams)).toEqual(grams.get(['3','*','*','O'])/grams.get(['2','*','*']));
+       expect(conditionalTrigramProbability('I-GENE','*','*',grams)).toEqual(0);
+       expect(conditionalTrigramProbability('I-GENE','I-GENE','*',grams)).toEqual(0);
+       expect(conditionalTrigramProbability('STOP','I-GENE','I-GENE',grams)).toEqual(1/3);
+    });
+
+    it("should be able to calculate emission probabilities", function() {
+       var c = count(trainingData);
+       var grams = c.grams;
+       var word_tags = c.word_tags;
+       expect(emission('Comparison','O', word_tags, grams)).toEqual(2/43);
+       expect(emission('Blah','O', word_tags, grams)).toEqual(0);
+       expect(emission('alkaline','I-GENE', word_tags, grams)).toEqual(0.2);
+       expect(emission('Comparison','I-GENE', word_tags, grams)).toEqual(0);
+       expect(emission('alkaline','O', word_tags, grams)).toEqual(0);
+    });
+
+    it("should be able to compute the viterbi algorithm", function() {
        var c = count(trainingData);
        var result = rarify(c,rareKeyword,2);
        var max = viterbi("Comparison with alkaline",result);

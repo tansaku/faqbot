@@ -44,45 +44,36 @@ function count(data){
 		else{
 			word_tags.set([word,category],word_tags.get([word,category])+1)
 		}
-        grams.set([1,category], grams.get([1,category])+1);
-        grams.set([2,category_minus_one,category], grams.get([2,category_minus_one,category])+1);
-        grams.set([3,category_minus_two,category_minus_one,category], grams.get([3,category_minus_two,category_minus_one,category])+1);
+    grams.set([1,category], grams.get([1,category])+1);
+    grams.set([2,category_minus_one,category], grams.get([2,category_minus_one,category])+1);
+    grams.set([3,category_minus_two,category_minus_one,category], grams.get([3,category_minus_two,category_minus_one,category])+1);
 
-        if(category === 'STOP'){
-        	category_minus_one = '*';
-			category_minus_two = '*';
-			grams.set([2,category_minus_two,category_minus_one], grams.get([2,category_minus_two,category_minus_one])+1);// HACK!!!!
-        }
-        else{
-	        category_minus_two = category_minus_one;
-        	category_minus_one = category;
-        }
-        
+    if(category === 'STOP'){
+    	category_minus_one = '*';
+	    category_minus_two = '*';
+	    grams.set([2,category_minus_two,category_minus_one], grams.get([2,category_minus_two,category_minus_one])+1);// HACK!!!!
+    }
+    else{
+      category_minus_two = category_minus_one;
+    	category_minus_one = category;
+    }
 	}
-	//debugger
-	var result = {};
-	result['grams'] = grams;
-	result['word_tags'] = word_tags;
+	return {'grams':grams, 'word_tags':word_tags};
+}
 
-	// so this function could be moved out of the larger one, tested independently perhaps
-	// currently relying on closing around the grams data object ...
-	// TODO pull these out
-	// TODO switch word_tags to using my hashes
-	result.hmm = function(z,y,x){
-		var numerator = result['grams'].get(['3',x,y,z]);
+function emission(word,category,word_tags,grams){
+  var numerator = word_tags.get([word,category]);
+  var denominator = grams.get(['1',category]);
+  return numerator/denominator;
+}
 
-		var denominator = result['grams'].get(['2',x,y]);
-		if(denominator == 0 ){
-			return 0;
-		}
-		return numerator/denominator;
-	};
-	result.emission = function(x,y){
-		var c = result['word_tags'].get([x,y]) || 0;
-		var d = result.get(['grams','1',category]); // this being wrong didn't trip a test ...
-        return c/d;
+function conditionalTrigramProbability(z,x,y,grams){
+	var numerator = grams.get(['3',x,y,z]);
+	var denominator = grams.get(['2',x,y]);
+	if(denominator == 0 ){
+		return 0;
 	}
-	return result;
+	return numerator/denominator;
 }
 
 function rarify(data,rareSymbol,rareThreshold){
@@ -117,10 +108,9 @@ function getSet(position){
 }
 
 function viterbi(sentence,result){
-
-
 	//Input: a sentence x_1 ... x_n, parameters q(s|u, v) and e(x|s).
-
+  var word_tags = result.word_tags;
+  var grams = result.grams;
 	//Initialization: Set pi(0,*,*) = 1
 	var pi = new Hash();
 	// NEED DEFAULT VALUES
@@ -137,33 +127,41 @@ function viterbi(sentence,result){
 	  for(var u in getSet(k-1)){
         for(var v in getSet(k)){
 	    // pi(k,u,v) = max_(w elementof S_k-2) (pi(k-1,w,u) x q(v|w,u) x e(x_k|v))
+
+	    
 	      var max = 0;
 	      var temp = 0;
 	      var temp_pi = 0;
 	      for(var w in getSet(k-2)){
 	      	// TODO really should pull out all these functions for testing
 	      	temp_pi = pi.get([k-1,w,u]);
-	      	if(temp_pi === undefined){
-	      		temp_pi = 0;
-	      	}
-            temp = temp_pi * result.hmm(v,w,u) * result.emission(words[k],v);
-            if(temp > max){
-            	max = temp;
-            }
+          temp = temp_pi * conditionalTrigramProbability(v,w,u,grams) * emission(words[k],v,word_tags,grams);
+          if(temp > max){
+          	max = temp;
+          }
 	      }
 	      pi.set([k,u,v],max);
+	      // TODO calculate backpointer
+	      //  bp(k,u,v) = arg max (π(k−1,w,u)×q(v|w,u)×e(xk|v)) w∈Sk−2
 	    }
 	  }
 	}
+	// TODO then work this out
+  // Set (yn−1, yn) = arg max(u,v) (π(n, u, v) × q(STOP|u, v)) 
+  // Fork=(n−2)...1,yk =bp(k+2,yk+1,yk+2)
+
+  // IDEALLY I WOULD BE UNDERSTANDING ALL THIS AT A LOWER LEVEL .... OR SHOULD WE JUST GO BACK TO FAQBOT?
+
+
 	//Return max_[u element of S_n-1,v element of S_n] (pi(n,u,v) x q(STOP|u,v))
 	var max = 0;
 	var temp = 0;
 	for(var u in getSet(n-1)){
 		for(var v in getSet(n)){
-			temp = pi.get([n,u,v]) * q.hmm('STOP',u,v);
+			temp = pi.get([n,u,v]) * conditionalTrigramProbability('STOP',u,v,grams);
 			if(temp > max){
             	max = temp;
-            }
+      }
 		}
 	}
 	return max;
