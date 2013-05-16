@@ -1,5 +1,5 @@
 function Hash(starting_state, default_return){
-	this.default = undefined;
+	this.default = 0;
 	if(default_return !== undefined){
 		this.default = default_return;
 	}

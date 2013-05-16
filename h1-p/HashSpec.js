@@ -4,7 +4,7 @@ describe("Hash", function() {
 	var hash;
 
 	beforeEach(function() {
-		hash = new Hash({}, DEFAULT);
+		hash = new Hash();
 	});
 
 	describe("starting state", function () {

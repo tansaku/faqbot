@@ -64,6 +64,9 @@ function count(data){
 function emission(word,category,word_tags,grams){
   var numerator = word_tags.get([word,category]);
   var denominator = grams.get(['1',category]);
+  if(denominator == 0 ){
+		return 0;
+	}
   return numerator/denominator;
 }
 
@@ -101,7 +104,7 @@ function rarify(data,rareSymbol,rareThreshold){
 }
 
 function getSet(position){
-	if(position == -1 || position == 0){
+	if(position == -2 || position == -1){
 		return {'*':undefined};
 	}
 	return {'O':undefined,'I-GENE':undefined,'STOP':undefined};
@@ -113,58 +116,71 @@ function viterbi(sentence,result){
   var grams = result.grams;
 	//Initialization: Set pi(0,*,*) = 1
 	var pi = new Hash();
+	var bp = new Hash();
 	// NEED DEFAULT VALUES
-	pi.set([0,'*','*'],1);
+	pi.set([-1,'*','*'],1);
 	//Definition: S_-1 = S_0 = {*}, S_k = S for k element of {1...n} set of possible tags
     
 	//Algorithm:
 	//For k = 1...n,
+	//debugger
 	var words = sentence.split(' ');
 	var n = words.length;
-	debugger
 	for(var k in words){
 	//  For u element of  S_k-1, v element of S_k,
-	  for(var u in getSet(k-1)){
-        for(var v in getSet(k)){
-	    // pi(k,u,v) = max_(w elementof S_k-2) (pi(k-1,w,u) x q(v|w,u) x e(x_k|v))
+		for(var u in getSet(k-1)){
+			for(var v in getSet(k)){
+			// pi(k,u,v) = max_(w elementof S_k-2) (pi(k-1,w,u) x q(v|w,u) x e(x_k|v))
 
-	    
-	      var max = 0;
-	      var temp = 0;
-	      var temp_pi = 0;
-	      for(var w in getSet(k-2)){
-	      	// TODO really should pull out all these functions for testing
-	      	temp_pi = pi.get([k-1,w,u]);
-          temp = temp_pi * conditionalTrigramProbability(v,w,u,grams) * emission(words[k],v,word_tags,grams);
-          if(temp > max){
-          	max = temp;
-          }
-	      }
-	      pi.set([k,u,v],max);
-	      // TODO calculate backpointer
-	      //  bp(k,u,v) = arg max (π(k−1,w,u)×q(v|w,u)×e(xk|v)) w∈Sk−2
-	    }
-	  }
-	}
-	// TODO then work this out
-  // Set (yn−1, yn) = arg max(u,v) (π(n, u, v) × q(STOP|u, v)) 
-  // Fork=(n−2)...1,yk =bp(k+2,yk+1,yk+2)
-
-  // IDEALLY I WOULD BE UNDERSTANDING ALL THIS AT A LOWER LEVEL .... OR SHOULD WE JUST GO BACK TO FAQBOT?
-
-
-	//Return max_[u element of S_n-1,v element of S_n] (pi(n,u,v) x q(STOP|u,v))
-	var max = 0;
-	var temp = 0;
-	for(var u in getSet(n-1)){
-		for(var v in getSet(n)){
-			temp = pi.get([n,u,v]) * conditionalTrigramProbability('STOP',u,v,grams);
-			if(temp > max){
-            	max = temp;
-      }
+				var max = 0;
+				var max_w = null;
+				var temp = 0;
+				var temp_pi = 0;
+				for(var w in getSet(k-2)){
+					debugger
+					// TODO can we have separate testing for more than just conditionalTrigramProbability and emission?
+					// would require me to understand better what was going on here ... 
+					temp_pi = pi.get([k-1,w,u]);
+					temp = temp_pi * conditionalTrigramProbability(v,w,u,grams) * emission(words[k],v,word_tags,grams);
+					if(temp >= max){
+						max = temp;
+						max_w = w;
+					}
+				}
+				pi.set([k,u,v],max);
+				// TODO calculate backpointer
+				//  bp(k,u,v) = arg max (π(k−1,w,u)×q(v|w,u)×e(xk|v)) w∈Sk−2
+				bp.set([k,u,v],max_w);
+			}
 		}
 	}
-	return max;
+
+  // IDEALLY I WOULD BE UNDERSTANDING ALL THIS AT A LOWER LEVEL .... OR SHOULD WE JUST GO BACK TO FAQBOT?
+  // NEED SIMPLER COMPONENTS AND TEST DATA TO CHECK THIS IS ALL WORKING ...
+
+	//Return max_[u element of S_n-1,v element of S_n] (pi(n,u,v) x q(STOP|u,v))
+	debugger
+	var max = 0;
+	var y = {};
+	var temp = 0;
+	for(var u in getSet(n-2)){
+		for(var v in getSet(n-1)){
+			temp = pi.get([n-1,u,v]) * conditionalTrigramProbability('STOP',u,v,grams);
+			if(temp >= max){
+				max = temp;
+				//Set (yn−1, yn) = arg max(u,v) (π(n, u, v) × q(STOP|u, v)) 
+				y[n-1] = u;
+				y[n] = v;
+			}
+		}
+	}
+	debugger
+	// For k=(n−2)...1,yk = bp(k+2,y_k+1,y_k+2)
+	for(var k = n-2; k>=0;k--){
+		y[k] = bp.get([k,y[k+1],y[k+2]]);
+	}
+
+	return {tag_sequence:y,max:max};
 }
 
 function tag(devData, result, rareSymbol){

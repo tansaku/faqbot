@@ -158,13 +158,17 @@ of O\n";
        expect(emission('alkaline','I-GENE', word_tags, grams)).toEqual(0.2);
        expect(emission('Comparison','I-GENE', word_tags, grams)).toEqual(0);
        expect(emission('alkaline','O', word_tags, grams)).toEqual(0);
+       // TODO would be good to be checking for divide by zero
+       grams.set(['1','O'],0);
+       expect(emission('Comparison','O', word_tags, grams)).toEqual(0);
     });
 
     it("should be able to compute the viterbi algorithm", function() {
        var c = count(trainingData);
        var result = rarify(c,rareKeyword,2);
-       var max = viterbi("Comparison with alkaline",result);
-       expect(max).toEqual(0);
+       var result2 = viterbi("Comparison with alkaline",result);
+       expect(result2.tag_sequence).toEqual({0:'O',1:'O',2:'I-GENE',3:'STOP'});
+       expect(result2.max).toEqual(10);
 
     });
 
