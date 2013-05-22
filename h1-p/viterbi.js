@@ -107,25 +107,29 @@ function getSet(position){
 	if(position == -2 || position == -1){
 		return {'*':undefined};
 	}
-	return {'O':undefined,'I-GENE':undefined,'STOP':undefined};
+	return {'STOP':undefined,'I-GENE':undefined,'O':undefined};
 }
 
 function viterbi(sentence,result){
-	//Input: a sentence x_1 ... x_n, parameters q(s|u, v) and e(x|s).
+	// Input: a sentence x_1 ... x_n, parameters q(s|u, v) and e(x|s).
   var word_tags = result.word_tags;
   var grams = result.grams;
-	//Initialization: Set pi(0,*,*) = 1
-	var pi = new Hash();
+	
+	var pi = new Hash(); // maximum probability of a tag sequence ending in tags u, v at position k
 	var bp = new Hash();
-	// NEED DEFAULT VALUES
+	// Initialization: Set pi(0,*,*) = 1
 	pi.set([-1,'*','*'],1);
-	//Definition: S_-1 = S_0 = {*}, S_k = S for k element of {1...n} set of possible tags
+	// Define Sk for k = -1 ... n to be the set of possible tags at position k
+	// Definition: S_-1 = S_0 = {*}, S_k = S for k element of {1...n} set of possible tags
+
+	// Algorithm notation has positions -1 and 0 as prior to the actual sentence, which runs 1...n
+	// our loop naturally runs from 0...n-1, making the prior positions -2 and -1
     
-	//Algorithm:
-	//For k = 1...n,
-	//debugger
+	// Algorithm:
+	// For k = 1...n,  or in our case 0...n-1
+	// debugger
 	var words = sentence.split(' ');
-	var n = words.length;
+	var n = words.length; // length of sentence
 	for(var k in words){
 	//  For u element of  S_k-1, v element of S_k,
 		for(var u in getSet(k-1)){
@@ -137,11 +141,15 @@ function viterbi(sentence,result){
 				var temp = 0;
 				var temp_pi = 0;
 				for(var w in getSet(k-2)){
-					debugger
+					//debugger
 					// TODO can we have separate testing for more than just conditionalTrigramProbability and emission?
-					// would require me to understand better what was going on here ... 
+					// would require me to understand better what was going on here ... test getSet functions?
 					temp_pi = pi.get([k-1,w,u]);
-					temp = temp_pi * conditionalTrigramProbability(v,w,u,grams) * emission(words[k],v,word_tags,grams);
+					// breakdown here seems to be partly that we are not handling _RARE_ words correctly
+					// if emission probability is zero we should switch to _RARE_ probability
+					p_emission = emission(words[k],v,word_tags,grams);
+					if (p_emission === 0) {p_emission = emission("_RARE_",v,word_tags,grams);}
+					temp = temp_pi * conditionalTrigramProbability(v,w,u,grams) * p_emission;
 					if(temp >= max){
 						max = temp;
 						max_w = w;
@@ -159,7 +167,7 @@ function viterbi(sentence,result){
   // NEED SIMPLER COMPONENTS AND TEST DATA TO CHECK THIS IS ALL WORKING ...
 
 	//Return max_[u element of S_n-1,v element of S_n] (pi(n,u,v) x q(STOP|u,v))
-	debugger
+	//debugger
 	var max = 0;
 	var y = {};
 	var temp = 0;
@@ -169,15 +177,15 @@ function viterbi(sentence,result){
 			if(temp >= max){
 				max = temp;
 				//Set (yn−1, yn) = arg max(u,v) (π(n, u, v) × q(STOP|u, v)) 
-				y[n-1] = u;
-				y[n] = v;
+				y[n-2] = u;
+				y[n-1] = v;
 			}
 		}
 	}
-	debugger
+	//debugger
 	// For k=(n−2)...1,yk = bp(k+2,y_k+1,y_k+2)
-	for(var k = n-2; k>=0;k--){
-		y[k] = bp.get([k,y[k+1],y[k+2]]);
+	for(var k = n-3; k>=0;k--){
+		y[k] = bp.get([k+2,y[k+1],y[k+2]]);
 	}
 
 	return {tag_sequence:y,max:max};
