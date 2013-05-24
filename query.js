@@ -28,18 +28,14 @@ function query(sentence) {
     // 5. could add eliza/twss code?
     // 6. could add joke of the day code - looks like we can't due to cross-server scripting constraint
     // 7. chuck norris code might work
-    
-    // Using named capture and flag x (free-spacing and line comments)
-    var assert = XRegExp('(?<assert>  (T|t)here(\\si|\')s\\sa ) \\s?  # assert  \n' +
-                         '(?<object> .* ) \\s  # object \n' +
-                         '(?<called> called ) \\s?  # called \n' +
-                         '(?<name>   .* )     # name     ', 'x');
+
+
     // so perhaps we could just create a json structure to reflect the assertion ...
     // I guess ultimately we really want that flexible parse structure to handle
     // a) Mobile is a new course
     // b) I heard that there's a new course called Mobile
     // c) Have you signed up for that new Mobile course?
-    var match = XRegExp.exec(sentence, assert);
+    var match = matchEntityAssertionRegex(sentence);
     // want to check is match is undefined or not ...
     var response = "OK";
      console.log("test");
@@ -51,10 +47,7 @@ function query(sentence) {
            and name them using a separate foaf:name triple. However, then
            we'd need a way to recognise existing entities.
         */
-        name = match.name.replace(' ','_');
-        storage.getDatabank()
-            .add(stringToResource(name) + ' a ' + quote(match.object))
-            .add(stringToResource(name) + ' foaf:name ' + quote(name));
+        storeEntity(match.object,match.name)
 
         // _:John a "person" ; foaf:name "John"    
         // _:John _:favourite_colour "blue" ; foaf:name "blue"    
@@ -90,6 +83,31 @@ function query(sentence) {
     }); */
     // $.icndb.getRandomJoke(12) // this was for chuck norris
     return response;
+}
+
+function matchEntityAssertionRegex(sentence) {
+    // Using named capture and flag x (free-spacing and line comments)
+    var assert = XRegExp('(?<assert>  (T|t)here(\\si|\')s\\sa ) \\s?  # assert  \n' +
+                         '(?<object> .* ) \\s  # object \n' +
+                         '(?<called> called ) \\s?  # called \n' +
+                         '(?<name>   .* )     # name     ', 'x');
+    return XRegExp.exec(sentence, assert);  
+}
+
+function storeEntity(object,name){
+  name = name.replace(' ','_');
+  storage.getDatabank()
+      .add(stringToResource(name) + ' a ' + quote(object))
+      .add(stringToResource(name) + ' foaf:name ' + quote(name));
+}
+
+function queryEntity(name) {
+  var raw = $.rdf({databank:storage.getDatabank()}).where('_:'+name+' a ?type').select(['type'])[0];
+  if(raw === undefined){
+    return undefined;
+  }
+  var value = raw.type.value || "";
+  return { name: value.trim()};
 }
 
 function matchPropertiesRegex(sentence){
@@ -135,9 +153,9 @@ function handleQuestion(sentence) {
     // TODO return all other relations for that thing, e.g. website etc.
     for(var i in words){
       // _:John a ?type
-      result = $.rdf({databank:databank}).where('_:'+words[i]+' a ?type').select(['type'])[0];
+      result = queryEntity(words[i]);
       if(result !== undefined){
-        response = "I know that "+words[i].replace('_',' ')+" is a " + result.type.value;
+        response = "I know that "+words[i].replace('_',' ')+" is a " + result.name;
         break;
       }
     }

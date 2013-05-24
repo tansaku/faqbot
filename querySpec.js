@@ -19,6 +19,9 @@ describe("FaqBot", function() {
   //answers.push("Gandalf is a wizard");
   sentences.push("Unreal Engine has a website http://unrealengine.com");
   answers.push("The website for Unreal Engine is http://unrealengine.com");
+
+  sentences.push("What do you know about Robbie?");
+  answers.push("I know that Robbie is a robot");
 /*
   sentences.push("There is a game engine called Unity3D");
   answers.push("Unity3D is a game engine");
@@ -52,6 +55,39 @@ describe("FaqBot", function() {
     checkAnswer(i);
   }
   
+  it("should match entity assertion regex", function() {
+    // websites have URLs
+    var result = matchEntityAssertionRegex("There is a robot called Robbie");
+    expect(result).toNotEqual(null);
+    expect(result).toNotEqual(undefined);
+    expect(result.object).toEqual("robot");
+    expect(result.name).toEqual("Robbie");
+  });
+
+  it("should be able to store named entities", function() {
+    var object = 'robot';
+    var name = 'Robbie';
+    storeEntity(object, name);
+    var databank = storage.getDatabank();
+    var result = $.rdf({databank:databank}).where('_:'+name+' a ?type').select(['type'])[0];
+    expect(result.type.value.trim()).toEqual(object);
+  });
+
+  it("should be able to query databank", function() {
+    var object = 'robot';
+    var name = 'Robbie';  
+    storeEntity(object, name);
+    var result = queryEntity(name);
+    expect(result.name).toEqual(object);
+  })
+
+  it("should be able to query databank and fail properly", function() {
+    // TODO should add something to refresh databank between each test
+    var object = 'flower';
+    var name = 'Bert';  
+    var result = queryEntity(name);
+    expect(result).toEqual(undefined);
+  })
 
   it("should match properties regex", function() {
     // websites have URLs
