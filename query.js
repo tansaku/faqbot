@@ -102,6 +102,8 @@ function storeEntity(object,name){
 }
 
 function queryEntity(name) {
+  // doing this because databank seems to introduce trailing space into name
+  // TODO contact the rdf project people to let them know
   var raw = $.rdf({databank:storage.getDatabank()}).where('_:'+name+' a ?type').select(['type'])[0];
   if(raw === undefined){
     return undefined;
