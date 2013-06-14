@@ -176,6 +176,7 @@ of O\n";
        expect(result2.tag_sequence).toEqual({0:'O',1:'O',2:'O'});
        expect(result2.max).toEqual(0.001296748609757334);
        // not sure if the above are actually correct, but they are at least sensible
+       // Next step is to see what tagging we get on the gene.dev set
 
     });
 

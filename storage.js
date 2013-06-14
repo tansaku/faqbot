@@ -16,15 +16,17 @@ if (typeof(Storage) != "undefined") {
     }
  }
 
-function getStorage() {
+function getStorage(backend) {
     // Create a databank and add some common prefixes
     var databank = $.rdf.databank()
         .prefix('foaf', 'http://xmlns.com/foaf/0.1/')
         .prefix('dc', 'http://purl.org/dc/elements/1.1/')
         .prefix('dct', 'http://purl.org/dc/terms/')
-        .prefix('sam', 'http://linklens.blogspot.com/');
+        .prefix('sam', 'http://linklens.blogspot.com/');    
 
-    if (typeof(Storage) != "undefined") {
+    if(backend !== undefined) {
+        return new ChatbotStorage(databank, backend);
+    } else if (typeof(Storage) != "undefined") {
         return new ChatbotStorage(databank, new LocalStorage());
     } else {
         alert("no web storage, using Transient storage");
@@ -56,6 +58,18 @@ ChatbotStorage.prototype.getKnowledgeBaseAsText = function() {
 
 ChatbotStorage.prototype.isEmpty = function() {
     return this.backend.getItem('rdf') == undefined;
+}
+
+ChatbotStorage.prototype.clearDatabank = function() {
+    this.databank = null;
+    this.backend.setItem("rdf", null);
+}
+
+ChatbotStorage.prototype.storeEntity = function(object,name){
+  name = name.replace(' ','_');
+  this.getDatabank()
+      .add(stringToResource(name) + ' a ' + quote(object))
+      .add(stringToResource(name) + ' foaf:name ' + quote(name));
 }
 
 ChatbotStorage.prototype.clearTranscript = function() {

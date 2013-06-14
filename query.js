@@ -94,13 +94,6 @@ function matchEntityAssertionRegex(sentence) {
     return XRegExp.exec(sentence, assert);  
 }
 
-function storeEntity(object,name){
-  name = name.replace(' ','_');
-  storage.getDatabank()
-      .add(stringToResource(name) + ' a ' + quote(object))
-      .add(stringToResource(name) + ' foaf:name ' + quote(name));
-}
-
 function queryEntity(name) {
   // doing this because databank seems to introduce trailing space into name
   // TODO contact the rdf project people to let them know

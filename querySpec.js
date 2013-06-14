@@ -1,6 +1,16 @@
 describe("FaqBot", function() {
   var sentences = [];
   var answers = [];
+  var storage = null;
+
+  beforeEach(function() {
+    storage = getStorage(new TransientStorage());
+    //initStorage(storage);
+  });
+
+  afterEach(function() {
+    storage.clearDatabank();
+  });
 
   it("should respond as expected ", function() {
     expect(query("There is a game engine Unreal Engine")).toEqual("why?");
@@ -20,8 +30,12 @@ describe("FaqBot", function() {
   sentences.push("Unreal Engine has a website http://unrealengine.com");
   answers.push("The website for Unreal Engine is http://unrealengine.com");
 
-  sentences.push("What do you know about Robbie?");
-  answers.push("I know that Robbie is a robot");
+  sentences.push("what do you know about Unreal Engine?");
+  answers.push("I know that Unreal Engine is a game engine and website for Unreal Engine is http://unrealengine.com");
+
+  sentences.push("what is the website of Unreal Engine?");
+  answers.push("The website of Unreal Engine is http://unrealengine.com");
+
 /*
   sentences.push("There is a game engine called Unity3D");
   answers.push("Unity3D is a game engine");
@@ -44,7 +58,8 @@ describe("FaqBot", function() {
 */
 
   var checkAnswer = function(i){
-    it( "should respond to \""+sentences[i] + "\" with --> \"" + answers[i]+ "\"", function() {  
+    it( "should respond to \""+sentences[i] + "\" with --> \"" + answers[i]+ "\"", function() { 
+
         expect(query(sentences[i])).toEqual(answers[i]);
         // ideally we should be checking that data is stored in knowledge base ...
         // and dumping the knowledge base on each test iteration here ...
