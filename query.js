@@ -47,7 +47,7 @@ function query(sentence) {
            and name them using a separate foaf:name triple. However, then
            we'd need a way to recognise existing entities.
         */
-        storeEntity(match.object,match.name)
+        storage.storeEntity(match.object,match.name)
 
         // _:John a "person" ; foaf:name "John"    
         // _:John _:favourite_colour "blue" ; foaf:name "blue"    
@@ -62,7 +62,7 @@ function query(sentence) {
       var properties_match = matchPropertiesRegex(sentence);
 
       if( properties_match !== null){
-         storeProperty(properties_match.object, properties_match.relation, properties_match.name);
+         storage.storeProperty(properties_match.object, properties_match.relation, properties_match.name);
         return "The " + properties_match.relation +" for " + properties_match.object + " is " + properties_match.name;
       }
       else{
@@ -94,17 +94,6 @@ function matchEntityAssertionRegex(sentence) {
     return XRegExp.exec(sentence, assert);  
 }
 
-function queryEntity(name) {
-  // doing this because databank seems to introduce trailing space into name
-  // TODO contact the rdf project people to let them know
-  var raw = $.rdf({databank:storage.getDatabank()}).where('_:'+name+' a ?type').select(['type'])[0];
-  if(raw === undefined){
-    return undefined;
-  }
-  var value = raw.type.value || "";
-  return { name: value.trim()};
-}
-
 function matchPropertiesRegex(sentence){
   //Unreal Engine has a website http://unrealengine.com  ---> _:Unreal_Engine has_a_website http://unrealengine.com
   //Unreal Engine's website is http://unrealengine.com
@@ -113,12 +102,6 @@ function matchPropertiesRegex(sentence){
                      '(?<relation> .+ ) \\s  # relation \n' +
                      '(?<name>   .+ )     # name     ', 'x');
   return XRegExp.exec(sentence, assert);
-}
-
-function storeProperty(object, relation, name){
-  object = object.replace(' ','_');
-  storage.getDatabank()
-      .add(stringToResource(object) + ' sam:' + relation + ' ' + quote(name));
 }
 
 // TODO add this to String itself e.g. String.prototype.removeStopWords = function()
@@ -134,8 +117,8 @@ function handleQuestion(sentence) {
     var words = sentence.removeStopWords().split(' ');
 
     var bigrams = natural.NGrams.bigrams(words);
-    for(var i in bigrams){
-      words.push(bigrams[i].join('_'));
+    for(var i in bigrams){  // e.g. "Unreal Engine"
+      words.push(bigrams[i].join('_'));  // e.g. "Unreal_Engine"
     }
     // http://code.google.com/p/rdfquery/wiki/RdfPlugin
     // not sure how to query the rdf store ....
@@ -148,9 +131,10 @@ function handleQuestion(sentence) {
     // TODO return all other relations for that thing, e.g. website etc.
     for(var i in words){
       // _:John a ?type
-      result = queryEntity(words[i]);
+      result = storage.queryEntity(words[i]);
       if(result !== undefined){
-        response = "I know that "+words[i].replace('_',' ')+" is a " + result.name;
+        response = "I know that "+words[i].replace('_',' ')+" is a " + result.type;
+        // loop through result properties to mention other things about the entity
         break;
       }
     }

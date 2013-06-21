@@ -79,31 +79,6 @@ describe("FaqBot", function() {
     expect(result.name).toEqual("Robbie");
   });
 
-  it("should be able to store named entities", function() {
-    var object = 'robot';
-    var name = 'Robbie';
-    storeEntity(object, name);
-    var databank = storage.getDatabank();
-    var result = $.rdf({databank:databank}).where('_:'+name+' a ?type').select(['type'])[0];
-    expect(result.type.value.trim()).toEqual(object);
-  });
-
-  it("should be able to query databank", function() {
-    var object = 'robot';
-    var name = 'Robbie';  
-    storeEntity(object, name);
-    var result = queryEntity(name);
-    expect(result.name).toEqual(object);
-  })
-
-  it("should be able to query databank and fail properly", function() {
-    // TODO should add something to refresh databank between each test
-    var object = 'flower';
-    var name = 'Bert';  
-    var result = queryEntity(name);
-    expect(result).toEqual(undefined);
-  })
-
   it("should match properties regex", function() {
     // websites have URLs
     var result = matchPropertiesRegex("Unreal Engine has a website http://unrealengine.com");
@@ -113,18 +88,6 @@ describe("FaqBot", function() {
     expect(result.relation).toEqual("website");
     expect(result.name).toEqual("http://unrealengine.com");
   });
-
-  it("should be able to store properties relations", function() {
-    var object = 'Unreal Engine';
-    var relation = 'website';
-    var name = 'http://unrealengine.com';
-    var real_name = "Unreal_Engine";
-    storeProperty(object, relation, name);
-    var databank = storage.getDatabank();
-    var result = $.rdf({databank:databank}).where('_:'+real_name+' sam:website ?url').select(['url'])[0];
-    expect(result.url.value).toEqual(name);
-  });
-
 
   it("should remove punctuation", function() {
     expect(removePunctuation("Hello. How are you?")).toEqual("Hello How are you");
