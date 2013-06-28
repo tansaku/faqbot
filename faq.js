@@ -9,4 +9,5 @@ $(document).ready(function () {
     $("form#chat").submit(function () {
         return handleChat($("input#sentence").val());
     });
+    showTranscript();
 });

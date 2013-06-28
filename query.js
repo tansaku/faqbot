@@ -3,8 +3,6 @@ var storage = getStorage();
 
 initStorage(storage);
 
-showTranscript(storage);
-
 function query(sentence) {
     // check for sentence word by word in list (hashtable)
     var words = sentence.split(" ");
@@ -30,18 +28,14 @@ function query(sentence) {
     // 5. could add eliza/twss code?
     // 6. could add joke of the day code - looks like we can't due to cross-server scripting constraint
     // 7. chuck norris code might work
-    
-    // Using named capture and flag x (free-spacing and line comments)
-    var assert = XRegExp('(?<assert>  (T|t)here(\\si|\')s\\sa ) \\s?  # assert  \n' +
-                         '(?<object> .* ) \\s  # object \n' +
-                         '(?<called> called ) \\s?  # called \n' +
-                         '(?<name>   .* )     # name     ', 'x');
+
+
     // so perhaps we could just create a json structure to reflect the assertion ...
     // I guess ultimately we really want that flexible parse structure to handle
     // a) Mobile is a new course
     // b) I heard that there's a new course called Mobile
     // c) Have you signed up for that new Mobile course?
-    var match = XRegExp.exec(sentence, assert)
+    var match = matchEntityAssertionRegex(sentence);
     // want to check is match is undefined or not ...
     var response = "OK";
      console.log("test");
@@ -53,13 +47,27 @@ function query(sentence) {
            and name them using a separate foaf:name triple. However, then
            we'd need a way to recognise existing entities.
         */
-        name = match.name.replace(' ','_');
-        storage.getDatabank()
-            .add(stringToResource(name) + ' a ' + quote(match.object))
-            .add(stringToResource(name) + ' foaf:name ' + quote(name))
+        storage.storeEntity(match.object,match.name)
+
+        // _:John a "person" ; foaf:name "John"    
+        // _:John _:favourite_colour "blue" ; foaf:name "blue"    
+        // _:favourite_color type_of_relation "between people"  ????  
+
+        // "John" a "person" ???
+        // foaf:name
+        // foaf:type ?
+
     }
-    else{
-      response = handleQuestion(sentence);
+    else {
+      var properties_match = matchPropertiesRegex(sentence);
+
+      if( properties_match !== null){
+         storage.storeProperty(properties_match.object, properties_match.relation, properties_match.name);
+        return "The " + properties_match.relation +" for " + properties_match.object + " is " + properties_match.name;
+      }
+      else{
+        response = handleQuestion(sentence);
+      }
         
     }
        
@@ -77,6 +85,25 @@ function query(sentence) {
     return response;
 }
 
+function matchEntityAssertionRegex(sentence) {
+    // Using named capture and flag x (free-spacing and line comments)
+    var assert = XRegExp('(?<assert>  (T|t)here(\\si|\')s\\sa ) \\s?  # assert  \n' +
+                         '(?<object> .* ) \\s  # object \n' +
+                         '(?<called> called ) \\s?  # called \n' +
+                         '(?<name>   .* )     # name     ', 'x');
+    return XRegExp.exec(sentence, assert);  
+}
+
+function matchPropertiesRegex(sentence){
+  //Unreal Engine has a website http://unrealengine.com  ---> _:Unreal_Engine has_a_website http://unrealengine.com
+  //Unreal Engine's website is http://unrealengine.com
+  var assert = XRegExp('(?<object> .+ ) \\s  # object \n' +
+                     '(?<has_a> has\\sa ) \\s  # has_a \n' +
+                     '(?<relation> .+ ) \\s  # relation \n' +
+                     '(?<name>   .+ )     # name     ', 'x');
+  return XRegExp.exec(sentence, assert);
+}
+
 // TODO add this to String itself e.g. String.prototype.removeStopWords = function()
 function removePunctuation(sentence){
     return sentence.replace(/[^\w\s]/g,'');
@@ -84,14 +111,14 @@ function removePunctuation(sentence){
 
 function handleQuestion(sentence) {
        // want to query - can we do stop lists?
-    response = 'what was that?';
+    response = 'why?';
     var databank = storage.getDatabank();
     sentence = removePunctuation(sentence); // could get this function in String itself
     var words = sentence.removeStopWords().split(' ');
 
     var bigrams = natural.NGrams.bigrams(words);
-    for(var i in bigrams){
-      words.push(bigrams[i].join('_'));
+    for(var i in bigrams){  // e.g. "Unreal Engine"
+      words.push(bigrams[i].join('_'));  // e.g. "Unreal_Engine"
     }
     // http://code.google.com/p/rdfquery/wiki/RdfPlugin
     // not sure how to query the rdf store ....
@@ -101,10 +128,13 @@ function handleQuestion(sentence) {
     //debugger
     var type = '';
     var result = {};
+    // TODO return all other relations for that thing, e.g. website etc.
     for(var i in words){
-      result = $.rdf({databank:databank}).where('_:'+words[i]+' a ?type').select(['type'])[0];
+      // _:John a ?type
+      result = storage.queryEntity(words[i]);
       if(result !== undefined){
-        response = "I know that "+words[i].replace('_',' ')+" is a " + result.type.value;
+        response = "I know that "+words[i].replace('_',' ')+" is a " + result.type;
+        // loop through result properties to mention other things about the entity
         break;
       }
     }

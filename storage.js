@@ -16,19 +16,26 @@ if (typeof(Storage) != "undefined") {
     }
  }
 
-function getStorage() {
+function getStorage(backend) {
     // Create a databank and add some common prefixes
-    var databank = $.rdf.databank()
-        .prefix('foaf', 'http://xmlns.com/foaf/0.1/')
-        .prefix('dc', 'http://purl.org/dc/elements/1.1/')
-        .prefix('dct', 'http://purl.org/dc/terms/');
+    var databank = createDatabank();   
 
-    if (typeof(Storage) != "undefined") {
+    if(backend !== undefined) {
+        return new ChatbotStorage(databank, backend);
+    } else if (typeof(Storage) != "undefined") {
         return new ChatbotStorage(databank, new LocalStorage());
     } else {
         alert("no web storage, using Transient storage");
         return new ChatbotStorage(databank, new TransientStorage());
     }
+}
+
+function createDatabank() {
+    return $.rdf.databank()
+        .prefix('foaf', 'http://xmlns.com/foaf/0.1/')
+        .prefix('dc', 'http://purl.org/dc/elements/1.1/')
+        .prefix('dct', 'http://purl.org/dc/terms/')
+        .prefix('sam', 'http://linklens.blogspot.com/'); 
 }
 
 function trim1 (str) {
@@ -55,6 +62,44 @@ ChatbotStorage.prototype.getKnowledgeBaseAsText = function() {
 
 ChatbotStorage.prototype.isEmpty = function() {
     return this.backend.getItem('rdf') == undefined;
+}
+
+ChatbotStorage.prototype.clearDatabank = function() {
+    this.databank = createDatabank();
+    this.backend.setItem("rdf", "");
+}
+
+ChatbotStorage.prototype.storeEntity = function(object,name){
+  name = name.replace(' ','_');
+  this.getDatabank()
+      .add(stringToResource(name) + ' a ' + quote(object))
+      .add(stringToResource(name) + ' foaf:name ' + quote(name));
+}
+
+ChatbotStorage.prototype.storeProperty = function (object, relation, name){
+  object = object.replace(' ','_');
+  this.getDatabank()
+      .add(stringToResource(object) + ' sam:' + relation + ' ' + quote(name));
+}
+
+ChatbotStorage.prototype.queryProperty = function (object, relation){
+  object = object.replace(' ','_');
+  var raw = $.rdf({databank:this.getDatabank()}).where('_:'+object+' sam:'+relation+' ?value').select(['value'])[0];
+  if(raw === undefined){
+    return undefined;
+  }
+  return { value: raw.value.value };
+}
+
+ChatbotStorage.prototype.queryEntity = function(name) {
+  // doing this because databank seems to introduce trailing space into name
+  // TODO contact the rdf project people to let them know
+  var raw = $.rdf({databank:this.getDatabank()}).where('_:'+name+' a ?type').select(['type'])[0];
+  if(raw === undefined){
+    return undefined;
+  }
+  var value = raw.type.value || "";
+  return { type: value.trim()};
 }
 
 ChatbotStorage.prototype.clearTranscript = function() {

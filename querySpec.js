@@ -1,9 +1,19 @@
 describe("FaqBot", function() {
   var sentences = [];
   var answers = [];
+  var storage = null;
+
+  beforeEach(function() {
+    storage = getStorage(new TransientStorage());
+    //initStorage(storage);
+  });
+
+  afterEach(function() {
+    storage.clearDatabank();
+  });
 
   it("should respond as expected ", function() {
-    expect(query("There is a game engine Unreal Engine")).toEqual("what was that?");
+    expect(query("There is a game engine Unreal Engine")).toEqual("why?");
   });
 
   // TODO ideally all this data would be in starting knowledge base for bot as well?
@@ -15,11 +25,18 @@ describe("FaqBot", function() {
   answers.push("Matilda is a horse");
   sentences.push("There is a course called ML");
   answers.push("ML is a course");
-  sentences.push("Gandalf is a wizard");
-  answers.push("Gandalf is a wizard");
+  //sentences.push("Gandalf is a wizard"); // will require new regex - next step extract existing one
+  //answers.push("Gandalf is a wizard");
   sentences.push("Unreal Engine has a website http://unrealengine.com");
   answers.push("The website for Unreal Engine is http://unrealengine.com");
 
+  sentences.push("what do you know about Unreal Engine?");
+  answers.push("I know that Unreal Engine is a game engine and website for Unreal Engine is http://unrealengine.com");
+
+  sentences.push("what is the website of Unreal Engine?");
+  answers.push("The website of Unreal Engine is http://unrealengine.com");
+
+/*
   sentences.push("There is a game engine called Unity3D");
   answers.push("Unity3D is a game engine");
   sentences.push("Unity3D has a URL of http://www.studica.com/unity");
@@ -38,10 +55,11 @@ describe("FaqBot", function() {
   answers.push("Source is a game engine");
   sentences.push("Source has a URL of http://source.valvesoftware.com/sourcesdk/sourceu.php");
   answers.push("The URL for Source is http://source.valvesoftware.com/sourcesdk/sourceu.php");
-
+*/
 
   var checkAnswer = function(i){
-    it( "should respond to \""+sentences[i] + "\" with --> \"" + answers[i]+ "\"", function() {  
+    it( "should respond to \""+sentences[i] + "\" with --> \"" + answers[i]+ "\"", function() { 
+
         expect(query(sentences[i])).toEqual(answers[i]);
         // ideally we should be checking that data is stored in knowledge base ...
         // and dumping the knowledge base on each test iteration here ...
@@ -52,7 +70,24 @@ describe("FaqBot", function() {
     checkAnswer(i);
   }
   
+  it("should match entity assertion regex", function() {
+    // websites have URLs
+    var result = matchEntityAssertionRegex("There is a robot called Robbie");
+    expect(result).toNotEqual(null);
+    expect(result).toNotEqual(undefined);
+    expect(result.object).toEqual("robot");
+    expect(result.name).toEqual("Robbie");
+  });
 
+  it("should match properties regex", function() {
+    // websites have URLs
+    var result = matchPropertiesRegex("Unreal Engine has a website http://unrealengine.com");
+    expect(result).toNotEqual(null);
+    expect(result).toNotEqual(undefined);
+    expect(result.object).toEqual("Unreal Engine");
+    expect(result.relation).toEqual("website");
+    expect(result.name).toEqual("http://unrealengine.com");
+  });
 
   it("should remove punctuation", function() {
     expect(removePunctuation("Hello. How are you?")).toEqual("Hello How are you");

@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <title>Count Stuff</title>
+
+  <link rel="shortcut icon" type="image/png" href="../thirdparty/jasmine-standalone-1.3.1/lib/jasmine-1.3.1/jasmine_favicon.png">
+  <link rel="stylesheet" type="text/css" href="../thirdparty/jasmine-standalone-1.3.1/lib/jasmine-1.3.1/jasmine.css">
+  <script type="text/javascript" src="../thirdparty/jasmine-standalone-1.3.1/lib/jasmine-1.3.1/jasmine.js"></script>
+  <script type="text/javascript" src="../thirdparty/jasmine-standalone-1.3.1/lib/jasmine-1.3.1/jasmine-html.js"></script>
+
+  <!-- include source files here... -->
+  <script type="text/javascript" src="../thirdparty/jasmine-standalone-1.3.1/src/Player.js"></script>
+  <script type="text/javascript" src="../thirdparty/jasmine-standalone-1.3.1/src/Song.js"></script>
+
+  <script type="text/javascript" src="../thirdparty/jquery-1.7.1.js"></script>
+
+  <script src="viterbi.js"></script>
+  <script src="Hash.js"></script>
+
+  <div id="output"><br/></div>
+  <script type="text/javascript">
+    (function() {
+      callAjax(function(data){
+        var result = rarify(count(data),'_RARE_',5);
+        var word_tags = result.word_tags;
+        var grams = result.grams;
+        for(var word in word_tags.hash){
+          for(var category in word_tags.get([word])){
+            var c = word_tags.get([word,category]);
+            $("div#output").append('e('+word+'|'+category+') = ('+c+'/'+grams.get(['1',category])+') = '+c/grams.get(['1',category])+' = '+emission(word,category,word_tags,grams)+'<br/>');
+          }
+        }
+      },'gene.train');
+    })();
+  </script>
+ 
+
+</head>
+
+<body>
+</body>
+</html>
