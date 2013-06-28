@@ -1,1 +1,6 @@
+.DS_Store
+h1-p/gene_test.p1.out
+h1-p/*.pdf
+joke.json
+*/.DS_Store
 *~
