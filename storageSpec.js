@@ -52,6 +52,10 @@ describe("Storage", function() {
     var result = storage.queryAllProperties(object);
     expect(result instanceof Array).toBeTruthy();
     expect(result.length).toEqual(2);
+
+    for (var i in data) {
+      expect(result).toContain(data[i]);
+    }
   });
 
   it("should be able to query databank for propertiesand fail properly", function() {

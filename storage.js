@@ -91,6 +91,10 @@ ChatbotStorage.prototype.queryProperty = function (object, relation){
   return { value: raw.value.value };
 }
 
+ChatbotStorage.prototype.queryAllProperties = function (object){
+  return [1,2];
+}
+
 ChatbotStorage.prototype.queryEntity = function(name) {
   // doing this because databank seems to introduce trailing space into name
   // TODO contact the rdf project people to let them know
