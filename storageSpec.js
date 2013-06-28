@@ -39,9 +39,19 @@ describe("Storage", function() {
 
 
   it("should be able to retrieve all properties", function() {
-    //var result = storage.queryAllProperties(name);
-    //expect("THIS NEEDED NEXT TO GET ALL PROPERTIES").toBeUndefined();
-    fail("THIS NEEDED NEXT TO GET ALL PROPERTIES");
+    var data = [ { name: 'http://unrealengine.com',
+                   relation: 'website' },
+                 { name: '3D',
+                   relation: 'type' } ];
+    var object = 'Unreal Engine';
+    var real_name = "Unreal_Engine";
+    for (var i in data) {
+        storage.storeProperty(object, data[i].relation, data[i].name);
+    }
+
+    var result = storage.queryAllProperties(object);
+    expect(result instanceof Array).toBeTruthy();
+    expect(result.length).toEqual(2);
   });
 
   it("should be able to query databank for propertiesand fail properly", function() {
