@@ -93,7 +93,6 @@ ChatbotStorage.prototype.queryProperty = function (object, relation){
 
 ChatbotStorage.prototype.queryAllProperties = function (object){
   object = object.replace(' ','_');
-  debugger
   var results = $.rdf({databank:this.getDatabank()}).where('_:'+object+' ?relation ?value').select(['relation','value']);
   var response = [];
   for(var i in results){

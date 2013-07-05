@@ -101,8 +101,8 @@ describe("FaqBot", function() {
 
   it("should respond from database when asked about a two word item", function() {
     expect(query("There is a game engine called Unreal Engine")).toEqual("Unreal Engine is a game engine");
-    expect(query("What do you know about Unreal Engine")).toEqual("I know that Unreal Engine is a game engine");
-    expect(query("What do you know about Unreal Engine?")).toEqual("I know that Unreal Engine is a game engine");
+    expect(query("What do you know about Unreal Engine")).toEqual("I know that Unreal Engine is a game engine and website for Unreal Engine is http://unrealengine.com");
+    expect(query("What do you know about Unreal Engine?")).toEqual("I know that Unreal Engine is a game engine and website for Unreal Engine is http://unrealengine.com");
   });
 
 
