@@ -1,8 +1,8 @@
 describe("Storage", function() {
-  //var storage;
+  var storage;
 
   beforeEach(function() {
-    //storage = getStorage(new TransientStorage());
+    storage = getStorage(new TransientStorage());
   });
 
   afterEach(function() {
@@ -12,14 +12,12 @@ describe("Storage", function() {
   
 
   it("should be able to get a non null storage", function() {
-    var storage = getStorage(new TransientStorage());
     expect(storage).not.toBeNull();
     expect(storage).toBeDefined();
 
   });
 
   it("should be able to get a blank storage", function() {
-    var storage = getStorage(new TransientStorage());
     expect(storage).not.toBeNull();
     expect(storage).toBeDefined();
     expect(storage.backend instanceof TransientStorage).toBeTruthy();
