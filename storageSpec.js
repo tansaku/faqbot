@@ -56,7 +56,7 @@ describe("Storage", function() {
     }
   });
 
-  it("should be able to query databank for propertiesand fail properly", function() {
+  it("should be able to query databank for properties and fail properly", function() {
     // TODO should add something to refresh databank between each test
     var object = 'flower';
     var name = 'Bert';  
@@ -88,7 +88,12 @@ describe("Storage", function() {
     var name = 'Bert';  
     var result = storage.queryEntity(name);
     expect(result).toEqual(undefined);
-  })
+  });
+
+  it("should persist the transcript", function(){
+     fail();
+  });
+
 
   it("can be cleared", function() {
     var storage = getStorage(new TransientStorage());
