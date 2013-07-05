@@ -93,6 +93,10 @@ describe("FaqBot", function() {
     expect(removePunctuation("Hello. How are you?")).toEqual("Hello How are you");
   });
 
+  it("should query against a specific storage", function(){
+    expect(query(storage,"There is a game engine called Unreal Engine")).toEqual("Unreal Engine is a game engine");
+  });
+
   it("should respond from database when asked about a one word item", function() {
     expect(query("There is a course called ML")).toEqual("ML is a course");
     expect(query("What do you know about ML")).toEqual("I know that ML is a course");
