@@ -111,7 +111,7 @@ function removePunctuation(sentence){
 
 function handleQuestion(sentence) {
        // want to query - can we do stop lists?
-    response = 'why?';
+    var response = 'why?';
     var databank = storage.getDatabank();
     sentence = removePunctuation(sentence); // could get this function in String itself
     var words = sentence.removeStopWords().split(' ');
@@ -133,8 +133,17 @@ function handleQuestion(sentence) {
       // _:John a ?type
       result = storage.queryEntity(words[i]);
       if(result !== undefined){
-        response = "I know that "+words[i].replace('_',' ')+" is a " + result.type;
-        // loop through result properties to mention other things about the entity
+        var obj = words[i].replace('_',' ')
+        var allProps = storage.queryAllProperties(obj);
+        response = "I know that "+obj+" is a " + result.type;
+        for (var nr in allProps) {
+          var relation = allProps[nr].relation;
+          var name = allProps[nr].name;
+          if ((result.type != name) && (relation.indexOf("foaf") == -1)) {
+              response += " and " + relation + " for " + obj + " is " + name;
+          }
+        }
+
         break;
       }
     }
