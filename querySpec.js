@@ -5,7 +5,7 @@ describe("FaqBot", function() {
 
   beforeEach(function() {
     storage = getStorage(new TransientStorage());
-    //initStorage(storage);
+    initStorage(storage);
   });
 
   afterEach(function() {
@@ -13,7 +13,7 @@ describe("FaqBot", function() {
   });
 
   it("should respond as expected ", function() {
-    expect(query("There is a game engine Unreal Engine")).toEqual("why?");
+    expect(query(storage,"There is a game engine Unreal Engine")).toEqual("why?");
   });
 
   // TODO ideally all this data would be in starting knowledge base for bot as well?
@@ -60,7 +60,7 @@ describe("FaqBot", function() {
   var checkAnswer = function(i){
     it( "should respond to \""+sentences[i] + "\" with --> \"" + answers[i]+ "\"", function() { 
 
-        expect(query(sentences[i])).toEqual(answers[i]);
+        expect(query(storage,sentences[i])).toEqual(answers[i]);
         // ideally we should be checking that data is stored in knowledge base ...
         // and dumping the knowledge base on each test iteration here ...
       });
@@ -98,15 +98,20 @@ describe("FaqBot", function() {
   });
 
   it("should respond from database when asked about a one word item", function() {
-    expect(query("There is a course called ML")).toEqual("ML is a course");
-    expect(query("What do you know about ML")).toEqual("I know that ML is a course");
-    expect(query("What do you know about ML?")).toEqual("I know that ML is a course");
+    expect(query(storage,"There is a course called ML")).toEqual("ML is a course");
+    expect(query(storage,"What do you know about ML")).toEqual("I know that ML is a course");
+    expect(query(storage,"What do you know about ML?")).toEqual("I know that ML is a course");
   });
 
   it("should respond from database when asked about a two word item", function() {
-    expect(query("There is a game engine called Unreal Engine")).toEqual("Unreal Engine is a game engine");
-    expect(query("What do you know about Unreal Engine")).toEqual("I know that Unreal Engine is a game engine and website for Unreal Engine is http://unrealengine.com");
-    expect(query("What do you know about Unreal Engine?")).toEqual("I know that Unreal Engine is a game engine and website for Unreal Engine is http://unrealengine.com");
+    expect(query(storage,"There is a game engine called Unreal Engine")).toEqual("Unreal Engine is a game engine");
+    expect(query(storage,"What do you know about Unreal Engine")).toEqual("I know that Unreal Engine is a game engine and website for Unreal Engine is http://unrealengine.com");
+    expect(query(storage,"What do you know about Unreal Engine?")).toEqual("I know that Unreal Engine is a game engine and website for Unreal Engine is http://unrealengine.com");
+  });
+
+  it("should be able to handle question based on passed in storage", function() {
+    expect(query(storage,"There is a course called ML")).toEqual("ML is a course");
+    expect(handleQuestion(storage,"What do you know about ML")).toEqual("I know that ML is a course");
   });
 
 

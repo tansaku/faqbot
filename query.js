@@ -3,7 +3,7 @@ var storage = getStorage();
 
 initStorage(storage);
 
-function query(sentence) {
+function query(storage, sentence) {
     // check for sentence word by word in list (hashtable)
     var words = sentence.split(" ");
     var lookup = "";
@@ -38,7 +38,7 @@ function query(sentence) {
     var match = matchEntityAssertionRegex(sentence);
     // want to check is match is undefined or not ...
     var response = "OK";
-     console.log("test");
+
     if(match !== null){
         response = match.name + ' is a ' +match.object;
         
@@ -185,7 +185,7 @@ function handleCommand(sentence) {
 function handleChat(sentence) {
   if (!handleCommand(sentence)) {
       showResponse('human', sentence + "<br/>");
-      showResponse('bot', query(sentence) + "<br/>");
+      showResponse('bot', query(storage, sentence) + "<br/>");
       storage.save();
   }
  
@@ -214,7 +214,7 @@ function initStorage(storage) {
       // load the initial knowledge base from a text file in turtle format
       $.get('initial_kb.txt', function(turtle) {
           storage.loadKnowledgeBaseFromString(turtle);
-          alert("from local file: " + turtle);
+          //alert("from local file: " + turtle);
           storage.save();
       }, 'text');
   } else {
