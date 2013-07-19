@@ -30,12 +30,6 @@ describe("FaqBot", function() {
   sentences.push("Unreal Engine has a website http://unrealengine.com");
   answers.push("The website for Unreal Engine is http://unrealengine.com");
 
-  sentences.push("what do you know about Unreal Engine?");
-  answers.push("I know that Unreal Engine is a game engine and website for Unreal Engine is http://unrealengine.com");
-
-  sentences.push("what is the website of Unreal Engine?");
-  answers.push("The website of Unreal Engine is http://unrealengine.com");
-
 /*
   sentences.push("There is a game engine called Unity3D");
   answers.push("Unity3D is a game engine");
@@ -105,6 +99,7 @@ describe("FaqBot", function() {
 
   it("should respond from database when asked about a two word item", function() {
     expect(query(storage,"There is a game engine called Unreal Engine")).toEqual("Unreal Engine is a game engine");
+    expect(query(storage,"Unreal Engine has a website http://unrealengine.com")).toEqual("The website for Unreal Engine is http://unrealengine.com");
     expect(query(storage,"What do you know about Unreal Engine")).toEqual("I know that Unreal Engine is a game engine and website for Unreal Engine is http://unrealengine.com");
     expect(query(storage,"What do you know about Unreal Engine?")).toEqual("I know that Unreal Engine is a game engine and website for Unreal Engine is http://unrealengine.com");
   });
@@ -112,6 +107,12 @@ describe("FaqBot", function() {
   it("should be able to handle question based on passed in storage", function() {
     expect(query(storage,"There is a course called ML")).toEqual("ML is a course");
     expect(handleQuestion(storage,"What do you know about ML")).toEqual("I know that ML is a course");
+  });
+
+  it("it should be able to ahndle queries about properties", function() {
+    expect(query(storage,"There is a game engine called Unreal Engine")).toEqual("Unreal Engine is a game engine");
+    expect(query(storage,"Unreal Engine has a website http://unrealengine.com")).toEqual("The website for Unreal Engine is http://unrealengine.com");
+    expect(query(storage,"what is the website of Unreal Engine?")).toEqual("The website of Unreal Engine is http://unrealengine.com");
   });
 
 

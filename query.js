@@ -66,7 +66,7 @@ function query(storage, sentence) {
         return "The " + properties_match.relation +" for " + properties_match.object + " is " + properties_match.name;
       }
       else{
-        response = handleQuestion(sentence);
+        response = handleQuestion(storage,sentence);
       }
         
     }
@@ -109,7 +109,7 @@ function removePunctuation(sentence){
     return sentence.replace(/[^\w\s]/g,'');
 }
 
-function handleQuestion(sentence) {
+function handleQuestion(storage, sentence) {
        // want to query - can we do stop lists?
     var response = 'why?';
     var databank = storage.getDatabank();
