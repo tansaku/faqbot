@@ -109,12 +109,11 @@ describe("FaqBot", function() {
     expect(handleQuestion(storage,"What do you know about ML")).toEqual("I know that ML is a course");
   });
 
-  it("it should be able to ahndle queries about properties", function() {
+  it("it should be able to handle queries about a single properties", function() {
     expect(query(storage,"There is a game engine called Unreal Engine")).toEqual("Unreal Engine is a game engine");
     expect(query(storage,"Unreal Engine has a website http://unrealengine.com")).toEqual("The website for Unreal Engine is http://unrealengine.com");
-    expect(query(storage,"what is the website of Unreal Engine?")).toEqual("The website of Unreal Engine is http://unrealengine.com");
+    expect(query(storage,"what is the website of Unreal Engine?")).toEqual("The website for Unreal Engine is http://unrealengine.com");
   });
-
 
   // not sure how/if we can have pending specs
 

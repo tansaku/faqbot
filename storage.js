@@ -31,6 +31,7 @@ function getStorage(backend) {
 }
 
 function createDatabank() {
+    // http://code.google.com/p/rdfquery/wiki/RdfPlugin
     return $.rdf.databank()
         .prefix('foaf', 'http://xmlns.com/foaf/0.1/')
         .prefix('dc', 'http://purl.org/dc/elements/1.1/')

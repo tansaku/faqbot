@@ -109,23 +109,20 @@ function removePunctuation(sentence){
     return sentence.replace(/[^\w\s]/g,'');
 }
 
-function handleQuestion(storage, sentence) {
-       // want to query - can we do stop lists?
-    var response = 'why?';
-    var databank = storage.getDatabank();
+function getPossibleEntities(sentence){
     sentence = removePunctuation(sentence); // could get this function in String itself
     var words = sentence.removeStopWords().split(' ');
-
     var bigrams = natural.NGrams.bigrams(words);
     for(var i in bigrams){  // e.g. "Unreal Engine"
       words.push(bigrams[i].join('_'));  // e.g. "Unreal_Engine"
     }
-    // http://code.google.com/p/rdfquery/wiki/RdfPlugin
-    // not sure how to query the rdf store ....
+    return words;
+}
 
-    //$.rdf({databank:databank}).where('?name a ?type').select(['name','type'])
-    //$.rdf({databank:databank}).where('?name a ?type').select(['name','type'])
-    //debugger
+function handleQuestion(storage, sentence) {
+    // now this really needs refactoring!!!
+    var response = 'why?';
+    var words = getPossibleEntities(sentence);
     var type = '';
     var result = {};
     // TODO return all other relations for that thing, e.g. website etc.
@@ -134,16 +131,24 @@ function handleQuestion(storage, sentence) {
       result = storage.queryEntity(words[i]);
       if(result !== undefined){
         var obj = words[i].replace('_',' ')
+        // to query a specific relation we have to look for all possible relations 
+        // and see if any match any of the other words in the sentence
+        //storage.queryProperty(name,relation);
         var allProps = storage.queryAllProperties(obj);
         response = "I know that "+obj+" is a " + result.type;
         for (var nr in allProps) {
           var relation = allProps[nr].relation;
           var name = allProps[nr].name;
           if ((result.type != name) && (relation.indexOf("foaf") == -1)) {
+            debugger
+            if(words.some(function(x){return x === relation})){
+              response = "The " + relation + " for " + obj + " is " + name;
+              break;
+            }else{
               response += " and " + relation + " for " + obj + " is " + name;
+            }
           }
         }
-
         break;
       }
     }
